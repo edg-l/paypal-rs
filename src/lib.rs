@@ -9,6 +9,9 @@ use std::time::{Duration, Instant};
 pub const LIVE_ENDPOINT: &str = "https://api.paypal.com";
 pub const SANDBOX_ENDPOINT: &str = "https://api.sandbox.paypal.com";
 
+/// Represents the access token returned by the oauth2 authentication.
+///
+/// https://developer.paypal.com/docs/api/get-an-access-token-postman/
 #[derive(Debug, Deserialize)]
 pub struct AccessToken {
     pub scope: String,
@@ -24,9 +27,10 @@ pub struct Auth<'a> {
     pub client_id: &'a str,
     pub secret: &'a str,
     pub access_token: Option<AccessToken>,
-    pub expires: Option<Instant>,
+    pub expires: Option<(Instant, Duration)>,
 }
 
+/// Represents a client used to interact with the paypal api.
 #[derive(Debug)]
 pub struct Client<'a> {
     pub client: reqwest::Client,
@@ -35,6 +39,7 @@ pub struct Client<'a> {
 }
 
 impl<'a> Client<'a> {
+    /// Returns a new client, you must get_access_token afterwards to interact with the api.
     pub fn new(client_id: &'a str, secret: &'a str, sandbox: bool) -> Client<'a> {
         Client {
             client: reqwest::Client::new(),
@@ -56,6 +61,7 @@ impl<'a> Client<'a> {
         }
     }
 
+    /// Gets a access token used in all the api calls.
     pub async fn get_access_token(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let res = self
             .client
@@ -69,7 +75,7 @@ impl<'a> Client<'a> {
 
         if res.status().is_success() {
             let token = res.json::<AccessToken>().await?;
-            self.auth.expires = Some(Instant::now() + Duration::new(token.expires_in, 0));
+            self.auth.expires = Some((Instant::now(), Duration::new(token.expires_in, 0)));
             self.auth.access_token = Some(token);
             println!("{:#?}", self.auth);
         } else {
@@ -79,5 +85,14 @@ impl<'a> Client<'a> {
         }
 
         Ok(())
+    }
+
+    /// Checks if the access token expired.
+    pub fn access_token_expired(&self) -> bool {
+        if let Some(expires) = self.auth.expires {
+            expires.0.elapsed() >= expires.1
+        } else {
+            true
+        }
     }
 }

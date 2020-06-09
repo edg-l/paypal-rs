@@ -1,13 +1,9 @@
-use std::fmt;
-use std::error::Error;
+use thiserror::Error;
 
-#[derive(Debug, Clone)]
-pub struct GetAccessTokenError;
-
-impl fmt::Display for GetAccessTokenError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "error getting access token")
-    }
+#[derive(Debug, Error)]
+pub enum Errors {
+    #[error("failed to get access token")]
+    GetAccessTokenFailure,
+    #[error("failure when calling the paypal api")]
+    ApiCallFailure,
 }
-
-impl Error for GetAccessTokenError {}

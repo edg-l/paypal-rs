@@ -4,6 +4,7 @@ mod tests;
 extern crate chrono;
 
 pub mod errors;
+pub mod orders;
 
 use serde::{Serialize, Deserialize};
 use std::time::{Duration, Instant};

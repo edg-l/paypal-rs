@@ -7,3 +7,8 @@ A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api
 Documentation: https://docs.rs/paypal-rs
 
 Currently in early development.
+
+## Testing
+You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
+
+`cargo test --lib`

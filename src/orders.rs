@@ -321,9 +321,9 @@ pub enum AuthorizationStatusDetails {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthorizationWithData {
     /// The status for the authorized payment.
-    status: AuthorizationStatus,
+    pub status: AuthorizationStatus,
     /// The details of the authorized order pending status. 
-    status_details: AuthorizationStatusDetails,
+    pub status_details: AuthorizationStatusDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -402,19 +402,19 @@ pub enum RefundStatusDetails {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Refund {
     /// The status of the refund. 
-    status: RefundStatus,
+    pub status: RefundStatus,
     /// The details of the refund status. 
-    status_details: RefundStatusDetails,
+    pub status_details: RefundStatusDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentCollection {
     /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments. 
-    authorizations: Vec<AuthorizationWithData>,
+    pub authorizations: Vec<AuthorizationWithData>,
     /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments. 
-    captures: Vec<Capture>,
+    pub captures: Vec<Capture>,
     /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds. 
-    refuns: Vec<Refund>,
+    pub refunds: Vec<Refund>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]

@@ -4,6 +4,8 @@
 
 A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously.
 
+Crate: https://crates.io/crates/paypal-rs
+
 Documentation: https://docs.rs/paypal-rs
 
 Currently in early development.

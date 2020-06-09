@@ -76,18 +76,18 @@ pub enum Prefer {
 /// https://developer.paypal.com/docs/api/reference/api-requests/#paypal-auth-assertion
 #[derive(Debug, Default)]
 pub struct HeaderParams {
-    merchant_payer_id: Option<String>,
-    client_metadata_id: Option<String>,
-    partner_attribution_id: Option<String>,
-    request_id: Option<String>,
-    prefer: Option<Prefer>,
-    content_type: Option<String>,
+    pub  merchant_payer_id: Option<String>,
+    pub client_metadata_id: Option<String>,
+    pub partner_attribution_id: Option<String>,
+    pub request_id: Option<String>,
+    pub prefer: Option<Prefer>,
+    pub content_type: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
 struct AuthAssertionClaims {
-    iss: String,
-    payer_id: String,
+    pub iss: String,
+    pub payer_id: String,
 }
 
 impl Client {

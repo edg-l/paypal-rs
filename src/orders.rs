@@ -79,18 +79,18 @@ pub struct TaxInfo {
 pub struct Address {
     /// The first line of the address. For example, number or street. For example, 173 Drury Lane.
     /// Required for data entry and compliance and risk checks. Must contain the full address.
-    address_line_1: Option<String>,
+    pub address_line_1: Option<String>,
     /// The second line of the address. For example, suite or apartment number.
-    address_line_2: Option<String>,
+    pub address_line_2: Option<String>,
     /// A city, town, or village. Smaller than admin_area_level_1.
-    admin_area_2: Option<String>,
+    pub admin_area_2: Option<String>,
     /// The highest level sub-division in a country, which is usually a province, state, or ISO-3166-2 subdivision.
     /// Format for postal delivery. For example, CA and not California.
-    admin_area_1: Option<String>,
+    pub admin_area_1: Option<String>,
     /// The postal code, which is the zip code or equivalent. Typically required for countries with a postal code or an equivalent.
-    postal_code: Option<String>,
+    pub postal_code: Option<String>,
     /// The two-character [ISO 3166-1](https://developer.paypal.com/docs/api/reference/country-codes/) code that identifies the country or region.
-    country_code: String,
+    pub country_code: String,
 }
 
 /// The customer who approves and pays for the order. The customer is also known as the payer.
@@ -118,13 +118,13 @@ pub struct Payer {
 #[derive(Debug)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    currency_code: String,
+    pub currency_code: String,
     /// The value, which might be:
     /// - An integer for currencies like JPY that are not typically fractional.
     /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
     ///
     /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
-    value: String,
+    pub value: String,
 }
 
 /// Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
@@ -132,47 +132,47 @@ pub struct Money {
 pub struct Breakdown {
     /// The subtotal for all items. Required if the request includes purchase_units[].items[].unit_amount.
     /// Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
-    item_total: Option<Money>,
+    pub item_total: Option<Money>,
     /// The shipping fee for all items within a given purchase_unit.
-    shipping: Option<Money>,
+    pub shipping: Option<Money>,
     /// The handling fee for all items within a given purchase_unit.
-    handling: Option<Money>,
+    pub handling: Option<Money>,
     /// The total tax for all items. Required if the request includes purchase_units.items.tax. Must equal the sum of (items[].tax * items[].quantity) for all items.
-    tax_total: Option<Money>,
+    pub tax_total: Option<Money>,
     /// The insurance fee for all items within a given purchase_unit.
-    insurance: Option<Money>,
+    pub insurance: Option<Money>,
     /// The shipping discount for all items within a given purchase_unit.
-    shipping_discount: Option<Money>,
+    pub shipping_discount: Option<Money>,
     /// The discount for all items within a given purchase_unit.
-    discount: Option<Money>,
+    pub discount: Option<Money>,
 }
 
 #[derive(Debug, Default)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    currency_code: String,
+    pub currency_code: String,
     /// The value, which might be:
     /// - An integer for currencies like JPY that are not typically fractional.
     /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
     ///
     /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
-    value: String,
+    pub value: String,
     /// The breakdown of the amount.
-    breakdown: Option<Breakdown>,
+    pub breakdown: Option<Breakdown>,
 }
 
 #[derive(Debug, Default)]
 pub struct Payee {
     /// The email address of merchant.
-    email_address: Option<String>,
+    pub email_address: Option<String>,
     /// The encrypted PayPal account ID of the merchant.
-    merchant_id: Option<String>,
+    pub merchant_id: Option<String>,
 }
 
 #[derive(Debug)]
 pub struct PlatformFee {
-    amount: Money,
-    payee: Option<Payee>,
+    pub amount: Money,
+    pub payee: Option<Payee>,
 }
 
 #[derive(Debug)]
@@ -194,9 +194,9 @@ impl Default for DisbursementMode {
 #[derive(Debug, Default)]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations. 
-    platform_fees: Option<Vec<PlatformFee>>,
+    pub platform_fees: Option<Vec<PlatformFee>>,
     /// The funds that are held on behalf of the merchant.
-    disbursement_mode: Option<DisbursementMode>
+    pub disbursement_mode: Option<DisbursementMode>
 }
 
 #[derive(Debug)]
@@ -217,34 +217,34 @@ impl Default for ItemCategoryType {
 
 #[derive(Debug, Default)]
 pub struct ShippingDetail {
-    name: Option<String>,
-    address: Option<Address>,
+    pub name: Option<String>,
+    pub address: Option<Address>,
 }
 
 #[derive(Debug)]
 pub struct Item {
     /// The item name or title.
-    name: String,
+    pub name: String,
     /// The item price or rate per unit.
     /// If you specify unit_amount, purchase_units[].amount.breakdown.item_total is required. Must equal unit_amount * quantity for all items. 
-    unit_amount: Money,
+    pub unit_amount: Money,
     /// The item tax for each unit. If tax is specified, purchase_units[].amount.breakdown.tax_total is required. Must equal tax * quantity for all items. 
-    tax: Option<Money>,
+    pub tax: Option<Money>,
     /// The item quantity. Must be a whole number. 
-    quantity: String,
+    pub quantity: String,
     /// The detailed item description. 
-    description: Option<String>,
+    pub description: Option<String>,
     /// The stock keeping unit (SKU) for the item. 
-    sku: Option<String>,
+    pub sku: Option<String>,
     /// The item category type
-    category: Option<ItemCategoryType>,
+    pub category: Option<ItemCategoryType>,
 }
 
 #[derive(Debug, Default)]
 pub struct PurchaseUnitRequest {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
     /// If you omit this value and the order contains only one purchase unit, PayPal sets this value to default.
-    reference_id: Option<String>,
+    pub reference_id: Option<String>,
     /// The total order amount with an optional breakdown that provides details, such as the total item amount,
     /// total tax amount, shipping, handling, insurance, and discounts, if any.
     ///
@@ -252,29 +252,29 @@ pub struct PurchaseUnitRequest {
     ///
     /// The amount must be a positive number. For listed of supported currencies and decimal precision,
     /// see the PayPal REST APIs [Currency Codes](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/).
-    amount: Amount,
+    pub amount: Amount,
     /// The merchant who receives payment for this transaction.
-    payee: Option<Payee>,
+    pub payee: Option<Payee>,
     /// Any additional payment instructions for PayPal Commerce Platform customers.
     /// Enables features for the PayPal Commerce Platform, such as delayed disbursement and collection of a platform fee.
     /// Applies during order creation for captured payments or during capture of authorized payments. 
-    payment_instruction: Option<PaymentInstruction>,
+    pub  payment_instruction: Option<PaymentInstruction>,
     /// The purchase description.
-    description: Option<String>,
+    pub description: Option<String>,
     /// The API caller-provided external ID. Used to reconcile client transactions with PayPal transactions.
     /// Appears in transaction and settlement reports but is not visible to the payer. 
-    custom_id: Option<String>,
+    pub custom_id: Option<String>,
     /// The API caller-provided external invoice number for this order.
     /// Appears in both the payer's transaction history and the emails that the payer receives. 
-    invoice_id: Option<String>,
+    pub invoice_id: Option<String>,
     /// The soft descriptor is the dynamic text used to construct the statement descriptor that appears on a payer's card statement.
     ///
     /// More info here: https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit_request
-    soft_descriptor: Option<String>,
+    pub soft_descriptor: Option<String>,
     /// An array of items that the customer purchases from the merchant. 
-    items: Option<Vec<Item>>,
+    pub items: Option<Vec<Item>>,
     /// The name and address of the person to whom to ship the items. 
-    shipping: Option<ShippingDetail>,
+    pub shipping: Option<ShippingDetail>,
 }
 
 /// The type of landing page to show on the PayPal site for customer checkout. 
@@ -350,43 +350,43 @@ impl Default for PayeePreferred {
 
 #[derive(Debug, Default)]
 pub struct PaymentMethod {
-    payer_selected: Option<String>,
-    payer_prefered: Option<PayeePreferred>,
+    pub payer_selected: Option<String>,
+    pub payer_prefered: Option<PayeePreferred>,
 }
 
 #[derive(Debug, Default)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site. 
-    brand_name: Option<String>,
+    pub brand_name: Option<String>,
     /// The BCP 47-formatted locale of pages that the PayPal payment experience shows. PayPal supports a five-character code.
     ///
     /// For example, da-DK, he-IL, id-ID, ja-JP, no-NO, pt-BR, ru-RU, sv-SE, th-TH, zh-CN, zh-HK, or zh-TW. 
-    locale: Option<String>,
+    pub locale: Option<String>,
     /// The type of landing page to show on the PayPal site for customer checkout
-    landing_page: Option<LandingPage>,
+    pub landing_page: Option<LandingPage>,
     /// The shipping preference
-    shipping_preference: Option<ShippingPreference>,
+    pub shipping_preference: Option<ShippingPreference>,
     /// Configures a Continue or Pay Now checkout flow.
-    user_action: Option<UserAction>,
+    pub user_action: Option<UserAction>,
     /// The customer and merchant payment preferences. 
-    payment_method: Option<PaymentMethod>,
+    pub payment_method: Option<PaymentMethod>,
     /// The URL where the customer is redirected after the customer approves the payment. 
-    return_url: Option<String>,
+    pub return_url: Option<String>,
     /// The URL where the customer is redirected after the customer cancels the payment. 
-    cancel_url: Option<String>,
+    pub cancel_url: Option<String>,
 }
 
 #[derive(Debug, Default)]
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
-    intent: Intent,
+    pub intent: Intent,
     /// The customer who approves and pays for the order. The customer is also known as the payer. 
-    payer: Option<Payer>,
+    pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a payer and the payee.
     /// Each purchase unit represents either a full or partial order that the payer intends to purchase from the payee. 
-    purchase_units: Vec<PurchaseUnitRequest>,
+    pub purchase_units: Vec<PurchaseUnitRequest>,
     /// Customize the payer experience during the approval process for the payment with PayPal. 
-    application_context: Option<ApplicationContext>,
+    pub application_context: Option<ApplicationContext>,
 }
 
 // TODO: Finish order https://developer.paypal.com/docs/api/orders/v2/

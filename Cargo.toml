@@ -1,6 +1,6 @@
 [package]
 name = "paypal-rs"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["Edgar <git@edgarluque.com>"]
 description = "A library that wraps the paypal api asynchronously."
 repository = "https://github.com/edg-l/paypal-rs/"

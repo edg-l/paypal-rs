@@ -1,4 +1,5 @@
-# paypal-rs 
+# paypal-rs
+[![Crates.io](https://meritbadge.herokuapp.com/paypal-rs)](https://crates.io/crates/paypal-rs)
 ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
 ![Docs](https://docs.rs/paypal-rs/badge.svg)
 

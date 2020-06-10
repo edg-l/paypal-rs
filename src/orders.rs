@@ -214,6 +214,7 @@ impl Amount {
     }
 }
 
+/// The merchant who receives payment for this transaction.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Payee {
     /// The email address of merchant.
@@ -224,13 +225,17 @@ pub struct Payee {
     pub merchant_id: Option<String>,
 }
 
+/// Fees, commissions, tips, or donations
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PlatformFee {
+    /// The fee for this transaction. 
     pub amount: Money,
     #[serde(skip_serializing_if = "Option::is_none")]
+    /// The merchant who receives payment for this transaction.
     pub payee: Option<Payee>,
 }
 
+/// The funds that are held on behalf of the merchant
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub enum DisbursementMode {
     /// The funds are released to the merchant immediately.
@@ -552,6 +557,7 @@ impl Default for ShippingPreference {
     }
 }
 
+/// Configures a Continue or Pay Now checkout flow.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserAction {
@@ -571,6 +577,7 @@ impl Default for UserAction {
     }
 }
 
+/// The merchant-preferred payment sources.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PayeePreferred {
@@ -588,14 +595,18 @@ impl Default for PayeePreferred {
     }
 }
 
+/// A payment method.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentMethod {
+    /// The customer-selected payment method on the merchant site. 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payer_selected: Option<String>,
+    /// The merchant-preferred payment sources.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub payer_prefered: Option<PayeePreferred>,
+    pub payee_preferred: Option<PayeePreferred>,
 }
 
+/// Customize the payer experience during the approval process for the payment with PayPal. 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site.
@@ -626,6 +637,7 @@ pub struct ApplicationContext {
     pub cancel_url: Option<String>,
 }
 
+/// A order payload to be used when creating an order.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
@@ -642,6 +654,7 @@ pub struct OrderPayload {
 }
 
 impl OrderPayload {
+    /// Creates a new order payload with the required properties.
     pub fn new<S: Into<Vec<PurchaseUnit>>>(intent: Intent, purchase_units: S) -> Self {
         Self {
             intent,
@@ -699,27 +712,35 @@ pub enum CardType {
     Unknown,
 }
 
+/// The payment card to use to fund a payment.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CardResponse {
     /// The last digits of the payment card.
     pub last_digits: String,
     /// The card brand or network.
     pub brand: CardBrand,
+    /// The payment card type.
     #[serde(rename = "type")]
     pub card_type: CardType,
 }
 
+/// The customer's wallet used to fund the transaction. 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WalletResponse {
+    /// Apple Pay Wallet response information. 
     pub apple_pay: CardResponse,
 }
 
+/// The payment source used to fund the payment.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentSourceResponse {
+    /// The payment card to use to fund a payment. Card can be a credit or debit card
     pub card: CardResponse,
+    /// The customer's wallet used to fund the transaction. 
     pub wallet: WalletResponse,
 }
 
+/// The status of an order.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderStatus {
@@ -750,6 +771,7 @@ pub enum LinkMethod {
     Patch,
 }
 
+/// A HTOAES link
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct LinkDescription {
     /// The complete target URL.
@@ -761,6 +783,7 @@ pub struct LinkDescription {
     pub method: Option<LinkMethod>,
 }
 
+/// An order represents a payment between two or more parties.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Order {
     /// The date and time when the transaction occurred.

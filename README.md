@@ -54,25 +54,25 @@ You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
 
 `cargo test --lib`
 
-## TODO
+## Roadmap
 
-- [x] Orders API
+- [x] Orders API - 0.1.0
 - - [x] Create order
 - - [x] Update order
 - - [x] Show order details
 - - [x] Authorize payment for order
 - - [x] Capture payment for order
-- [ ] Invoicing API
-- [ ] Tracking API
-- [ ] Subscriptions API
-- [ ] Identity API
-- [ ] Disputes API
-- [ ] Catalog Products API
-- [ ] Partner Referrals API
-- [ ] Payment Experience Web Profiles API 
-- [ ] Payments API
-- [ ] Payouts API
-- [ ] Transaction Search API
-- [ ] Referenced Payouts API
-- [ ] Vault API
-- [ ] Webhooks Management API
+- [ ] Invoicing API - 0.2.0
+- [ ] Payments API - 0.3.0
+- [ ] Tracking API - 0.4.0
+- [ ] Subscriptions API - 0.5.0
+- [ ] Identity API - 0.6.0
+- [ ] Disputes API - 0.7.0
+- [ ] Catalog Products API - 0.8.0
+- [ ] Partner Referrals API - 0.9.0
+- [ ] Payouts API - 0.10.0
+- [ ] Transaction Search API - 0.11.0
+- [ ] Referenced Payouts API - 0.12.0
+- [ ] Vault API - 0.13.0
+- [ ] Webhooks Management API - 0.14.0
+- [ ] Payment Experience Web Profiles API - 1.0.0

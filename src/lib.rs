@@ -10,7 +10,7 @@
 //! 
 //! Currently in early development.
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 #[cfg(test)]
 mod tests;

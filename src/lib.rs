@@ -1,3 +1,17 @@
+//! # paypal-rs 
+//! ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
+//! ![Docs](https://docs.rs/paypal-rs/badge.svg)
+//! 
+//! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
+//! 
+//! Crate: https://crates.io/crates/paypal-rs
+//! 
+//! Documentation: https://docs.rs/paypal-rs
+//! 
+//! Currently in early development.
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -11,7 +25,9 @@ use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
 
+/// The paypal api endpoint used on a live application.
 pub const LIVE_ENDPOINT: &str = "https://api.paypal.com";
+/// The paypal api endpoint used on when testing.
 pub const SANDBOX_ENDPOINT: &str = "https://api.sandbox.paypal.com";
 
 /// Represents the access token returned by the OAuth2 authentication.
@@ -104,6 +120,7 @@ pub struct Query {
     // TODO: Use https://github.com/samscott89/serde_qs
 }
 
+/// The preferred server response upon successful completion of the request.
 #[derive(Debug, Eq, PartialEq)]
 pub enum Prefer {
     /// The server returns a minimal response to optimize communication between the API caller and the server.

@@ -1,3 +1,9 @@
+//! An order represents a payment between two or more parties.
+//!
+//! Use the Orders API to create, update, retrieve, authorize, and capture orders. 
+//!
+//! Reference: https://developer.paypal.com/docs/api/orders/v2/
+
 use crate::errors;
 use serde::{Deserialize, Serialize};
 
@@ -38,6 +44,7 @@ pub struct PayerName {
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[allow(missing_docs)]
 pub enum PhoneType {
     Fax,
     Home,
@@ -46,6 +53,7 @@ pub enum PhoneType {
     Pager,
 }
 
+/// The phone number, in its canonical international E.164 numbering plan format.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct PhoneNumber {
     /// The national number, in its canonical international E.164 numbering plan format.
@@ -58,11 +66,14 @@ pub struct PhoneNumber {
 /// Contact Telephone Number option in the Profile & Settings for the merchant's PayPal account.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Phone {
+    /// The phone type. 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_type: Option<PhoneType>,
+    /// The phone number
     pub phone_number: PhoneNumber,
 }
 
+/// The customer's tax ID type. Supported for the PayPal payment method only.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(non_camel_case_types)]
@@ -73,6 +84,7 @@ pub enum TaxIdType {
     BR_CNPJ,
 }
 
+/// The tax information of the payer.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TaxInfo {
     /// The customer's tax ID. Supported for the PayPal payment method only.
@@ -82,6 +94,7 @@ pub struct TaxInfo {
     pub tax_id_type: TaxIdType,
 }
 
+/// The address of the payer.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Address {
     /// The first line of the address. For example, number or street. For example, 173 Drury Lane.
@@ -134,6 +147,7 @@ pub struct Payer {
     pub address: Option<Address>,
 }
 
+/// Represents money
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
@@ -173,6 +187,7 @@ pub struct Breakdown {
     pub discount: Option<Money>,
 }
 
+/// Represents an amount of money.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
@@ -232,6 +247,7 @@ impl Default for DisbursementMode {
     }
 }
 
+/// Any additional payment instructions for PayPal Commerce Platform customers. 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations.
@@ -242,6 +258,7 @@ pub struct PaymentInstruction {
     pub disbursement_mode: Option<DisbursementMode>,
 }
 
+/// The item category type.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemCategoryType {
@@ -259,14 +276,18 @@ impl Default for ItemCategoryType {
     }
 }
 
+/// The name and address of the person to whom to ship the items.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ShippingDetail {
+    /// The name of the person to whom to ship the items. Supports only the full_name property. 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// The address of the person to whom to ship the items. 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<Address>,
 }
 
+/// Represents an item.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Item {
     /// The item name or title.
@@ -658,6 +679,7 @@ pub enum CardBrand {
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[allow(missing_docs)]
 pub enum CardType {
     Credit,
     Debit,
@@ -704,6 +726,7 @@ pub enum OrderStatus {
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[allow(missing_docs)]
 pub enum LinkMethod {
     Get,
     Post,

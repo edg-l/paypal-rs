@@ -7,28 +7,31 @@ use serde::{Deserialize, Serialize};
 /// Represents a error HATEOAS link
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ErrorLink {
-    href: String,
-    rel: String,
-    method: String,
+    /// The complete target URL.
+    pub href: String,
+     /// The link relation type, which serves as an ID for a link that unambiguously describes the semantics of the link.
+    pub rel: String,
+    /// The HTTP method required to make the related call.
+    pub method: String,
 }
 
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApiResponseError {
     /// The error name.
-    name: String,
+    pub name: String,
     /// The error message.
-    message: String,
+    pub message: String,
     /// Paypal debug id
-    debug_id: String,
+    pub debug_id: String,
     /// Error details
-    details: Vec<HashMap<String, String>>,
+    pub details: Vec<HashMap<String, String>>,
     /// Only available on Identity errors
-    error: Option<String>,
+    pub error: Option<String>,
     /// Only available on Identity errors
-    error_description: Option<String>,
+    pub error_description: Option<String>,
     /// Links with more information about the error.
-    links: Vec<ErrorLink>,
+    pub links: Vec<ErrorLink>,
 }
 
 impl fmt::Display for ApiResponseError {

@@ -396,9 +396,9 @@ pub enum CaptureStatusDetails {
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Capture {
     /// The status of the captured payment.
-    status: CaptureStatus,
+    pub status: CaptureStatus,
     /// The details of the captured payment status.
-    status_details: CaptureStatusDetails,
+    pub status_details: CaptureStatusDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]

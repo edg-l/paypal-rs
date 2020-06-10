@@ -1,8 +1,8 @@
-use serde::{Serialize, Deserialize};
 use crate::errors;
+use serde::{Deserialize, Serialize};
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Intent {
     /// The merchant intends to capture payment immediately after the customer makes a payment.
@@ -24,7 +24,7 @@ impl Default for Intent {
 /// Represents a payer name.
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-payer.name
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct PayerName {
     /// When the party is a person, the party's given, or first, name.
     pub given_name: String,
@@ -36,7 +36,7 @@ pub struct PayerName {
 /// The phone type.
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PhoneType {
     Fax,
@@ -46,7 +46,7 @@ pub enum PhoneType {
     Pager,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct PhoneNumber {
     /// The national number, in its canonical international E.164 numbering plan format.
     /// The combined length of the country calling code (CC) and the national number must not be greater than 15 digits.
@@ -63,7 +63,7 @@ pub struct Phone {
     pub phone_number: PhoneNumber,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(non_camel_case_types)]
 pub enum TaxIdType {
@@ -134,7 +134,7 @@ pub struct Payer {
     pub address: Option<Address>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: String,
@@ -216,12 +216,12 @@ pub struct PlatformFee {
     pub payee: Option<Payee>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub enum DisbursementMode {
     /// The funds are released to the merchant immediately.
     Instant,
-    /// The funds are held for a finite number of days. The actual duration depends on the region and type of integration. 
-    /// You can release the funds through a referenced payout. 
+    /// The funds are held for a finite number of days. The actual duration depends on the region and type of integration.
+    /// You can release the funds through a referenced payout.
     /// Otherwise, the funds disbursed automatically after the specified duration.
     Delayed,
 }
@@ -234,19 +234,19 @@ impl Default for DisbursementMode {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentInstruction {
-    /// An array of various fees, commissions, tips, or donations. 
+    /// An array of various fees, commissions, tips, or donations.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub platform_fees: Option<Vec<PlatformFee>>,
     /// The funds that are held on behalf of the merchant.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub disbursement_mode: Option<DisbursementMode>
+    pub disbursement_mode: Option<DisbursementMode>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemCategoryType {
     /// Goods that are stored, delivered, and used in their electronic format.
-    /// This value is not currently supported for API callers that leverage 
+    /// This value is not currently supported for API callers that leverage
     /// the [PayPal for Commerce Platform](https://www.paypal.com/us/webapps/mpp/commerce-platform) product.
     Digital,
     /// A tangible item that can be shipped with proof of delivery.
@@ -272,17 +272,17 @@ pub struct Item {
     /// The item name or title.
     pub name: String,
     /// The item price or rate per unit.
-    /// If you specify unit_amount, purchase_units[].amount.breakdown.item_total is required. Must equal unit_amount * quantity for all items. 
+    /// If you specify unit_amount, purchase_units[].amount.breakdown.item_total is required. Must equal unit_amount * quantity for all items.
     pub unit_amount: Money,
-    /// The item tax for each unit. If tax is specified, purchase_units[].amount.breakdown.tax_total is required. Must equal tax * quantity for all items. 
+    /// The item tax for each unit. If tax is specified, purchase_units[].amount.breakdown.tax_total is required. Must equal tax * quantity for all items.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tax: Option<Money>,
-    /// The item quantity. Must be a whole number. 
+    /// The item quantity. Must be a whole number.
     pub quantity: String,
-    /// The detailed item description. 
+    /// The detailed item description.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    /// The stock keeping unit (SKU) for the item. 
+    /// The stock keeping unit (SKU) for the item.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sku: Option<String>,
     /// The item category type
@@ -290,7 +290,7 @@ pub struct Item {
     pub category: Option<ItemCategoryType>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatus {
     /// The authorized payment is created. No captured payments have been made for this authorized payment.
@@ -311,22 +311,22 @@ pub enum AuthorizationStatus {
     Pending,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatusDetails {
     /// Authorization is pending manual review.
     PendingReview,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct AuthorizationWithData {
     /// The status for the authorized payment.
     pub status: AuthorizationStatus,
-    /// The details of the authorized order pending status. 
+    /// The details of the authorized order pending status.
     pub status_details: AuthorizationStatusDetails,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatus {
     /// The funds for this captured payment were credited to the payee's PayPal account.
@@ -341,12 +341,12 @@ pub enum CaptureStatus {
     Refunded,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatusDetails {
     /// The payer initiated a dispute for this captured payment with PayPal.
     BuyerComplaint,
-    /// The captured funds were reversed in response to the payer disputing this captured payment with 
+    /// The captured funds were reversed in response to the payer disputing this captured payment with
     /// the issuer of the financial instrument used to pay for this captured payment.
     Chargeback,
     /// The payer paid by an eCheck that has not yet cleared.
@@ -359,7 +359,7 @@ pub enum CaptureStatusDetails {
     PendingReview,
     /// The payee has not yet set up appropriate receiving preferences for their account.
     /// For more information about how to accept or deny this payment, visit your account online.
-    /// This reason is typically offered in scenarios such as when the currency of the captured 
+    /// This reason is typically offered in scenarios such as when the currency of the captured
     /// payment is different from the primary holding currency of the payee.
     ReceivingPreferenceMandatesManualAction,
     /// The captured funds were refunded.
@@ -372,15 +372,15 @@ pub enum CaptureStatusDetails {
     VerificationRequired,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Capture {
     /// The status of the captured payment.
     status: CaptureStatus,
-    /// The details of the captured payment status. 
+    /// The details of the captured payment status.
     status_details: CaptureStatusDetails,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RefundStatus {
     /// The refund was cancelled.
@@ -392,7 +392,7 @@ pub enum RefundStatus {
 }
 
 /// The reason why the refund has the PENDING or FAILED status.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RefundStatusDetails {
     /// The customer's account is funded through an eCheck, which has not yet cleared.
@@ -401,19 +401,19 @@ pub enum RefundStatusDetails {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Refund {
-    /// The status of the refund. 
+    /// The status of the refund.
     pub status: RefundStatus,
-    /// The details of the refund status. 
+    /// The details of the refund status.
     pub status_details: RefundStatusDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentCollection {
-    /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments. 
+    /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
     pub authorizations: Vec<AuthorizationWithData>,
-    /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments. 
+    /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments.
     pub captures: Vec<Capture>,
-    /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds. 
+    /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds.
     pub refunds: Vec<Refund>,
 }
 
@@ -436,24 +436,24 @@ pub struct PurchaseUnit {
     pub payee: Option<Payee>,
     /// Any additional payment instructions for PayPal Commerce Platform customers.
     /// Enables features for the PayPal Commerce Platform, such as delayed disbursement and collection of a platform fee.
-    /// Applies during order creation for captured payments or during capture of authorized payments. 
+    /// Applies during order creation for captured payments or during capture of authorized payments.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_instruction: Option<PaymentInstruction>,
     /// The purchase description.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// The API caller-provided external ID. Used to reconcile client transactions with PayPal transactions.
-    /// Appears in transaction and settlement reports but is not visible to the payer. 
+    /// Appears in transaction and settlement reports but is not visible to the payer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_id: Option<String>,
     /// The API caller-provided external invoice number for this order.
-    /// Appears in both the payer's transaction history and the emails that the payer receives. 
+    /// Appears in both the payer's transaction history and the emails that the payer receives.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub invoice_id: Option<String>,
     /// The PayPal-generated ID for the purchase unit.
     /// This ID appears in both the payer's transaction history and the emails that the payer receives.
-    /// In addition, this ID is available in transaction and settlement reports that merchants and API callers can use to reconcile transactions. 
-    /// This ID is only available when an order is saved by calling v2/checkout/orders/id/save. 
+    /// In addition, this ID is available in transaction and settlement reports that merchants and API callers can use to reconcile transactions.
+    /// This ID is only available when an order is saved by calling v2/checkout/orders/id/save.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// The soft descriptor is the dynamic text used to construct the statement descriptor that appears on a payer's card statement.
@@ -461,10 +461,10 @@ pub struct PurchaseUnit {
     /// More info here: https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit_request
     #[serde(skip_serializing_if = "Option::is_none")]
     pub soft_descriptor: Option<String>,
-    /// An array of items that the customer purchases from the merchant. 
+    /// An array of items that the customer purchases from the merchant.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub items: Option<Vec<Item>>,
-    /// The name and address of the person to whom to ship the items. 
+    /// The name and address of the person to whom to ship the items.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping: Option<ShippingDetail>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -480,17 +480,17 @@ impl PurchaseUnit {
     }
 }
 
-/// The type of landing page to show on the PayPal site for customer checkout. 
-#[derive(Debug, Serialize, Deserialize)]
+/// The type of landing page to show on the PayPal site for customer checkout.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LandingPage {
     /// When the customer clicks PayPal Checkout, the customer is redirected to a page to log in to PayPal and approve the payment.
     Login,
-    /// When the customer clicks PayPal Checkout, the customer is redirected to a page 
+    /// When the customer clicks PayPal Checkout, the customer is redirected to a page
     /// to enter credit or debit card and other relevant billing information required to complete the purchase.
     Billing,
-    /// When the customer clicks PayPal Checkout, the customer is redirected to either a page to log in to PayPal and approve 
-    /// the payment or to a page to enter credit or debit card and other relevant billing information required to complete the purchase, 
+    /// When the customer clicks PayPal Checkout, the customer is redirected to either a page to log in to PayPal and approve
+    /// the payment or to a page to enter credit or debit card and other relevant billing information required to complete the purchase,
     /// depending on their previous interaction with PayPal.
     NoPreference,
 }
@@ -502,7 +502,7 @@ impl Default for LandingPage {
 }
 
 /// The shipping preference
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ShippingPreference {
     /// Use the customer-provided shipping address on the PayPal site.
@@ -519,7 +519,7 @@ impl Default for ShippingPreference {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserAction {
     /// After you redirect the customer to the PayPal payment page, a Continue button appears. Use this option when
@@ -527,7 +527,7 @@ pub enum UserAction {
     /// to the merchant page without processing the payment.
     Continue,
     /// After you redirect the customer to the PayPal payment page, a Pay Now button appears.
-    /// Use this option when the final amount is known when the checkout is initiated and you want to 
+    /// Use this option when the final amount is known when the checkout is initiated and you want to
     /// process the payment immediately when the customer clicks Pay Now.
     PayNow,
 }
@@ -538,13 +538,13 @@ impl Default for UserAction {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PayeePreferred {
     /// Accepts any type of payment from the customer.
     Unrestricted,
     /// Accepts only immediate payment from the customer.
-    /// For example, credit card, PayPal balance, or instant ACH. 
+    /// For example, credit card, PayPal balance, or instant ACH.
     /// Ensures that at the time of capture, the payment does not have the `pending` status.
     ImmediatePaymentRequired,
 }
@@ -565,12 +565,12 @@ pub struct PaymentMethod {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ApplicationContext {
-    /// The label that overrides the business name in the PayPal account on the PayPal site. 
+    /// The label that overrides the business name in the PayPal account on the PayPal site.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub brand_name: Option<String>,
     /// The BCP 47-formatted locale of pages that the PayPal payment experience shows. PayPal supports a five-character code.
     ///
-    /// For example, da-DK, he-IL, id-ID, ja-JP, no-NO, pt-BR, ru-RU, sv-SE, th-TH, zh-CN, zh-HK, or zh-TW. 
+    /// For example, da-DK, he-IL, id-ID, ja-JP, no-NO, pt-BR, ru-RU, sv-SE, th-TH, zh-CN, zh-HK, or zh-TW.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
     /// The type of landing page to show on the PayPal site for customer checkout
@@ -582,13 +582,13 @@ pub struct ApplicationContext {
     /// Configures a Continue or Pay Now checkout flow.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_action: Option<UserAction>,
-    /// The customer and merchant payment preferences. 
+    /// The customer and merchant payment preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_method: Option<PaymentMethod>,
-    /// The URL where the customer is redirected after the customer approves the payment. 
+    /// The URL where the customer is redirected after the customer approves the payment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub return_url: Option<String>,
-    /// The URL where the customer is redirected after the customer cancels the payment. 
+    /// The URL where the customer is redirected after the customer cancels the payment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cancel_url: Option<String>,
 }
@@ -597,13 +597,13 @@ pub struct ApplicationContext {
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
     pub intent: Intent,
-    /// The customer who approves and pays for the order. The customer is also known as the payer. 
+    /// The customer who approves and pays for the order. The customer is also known as the payer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a payer and the payee.
-    /// Each purchase unit represents either a full or partial order that the payer intends to purchase from the payee. 
+    /// Each purchase unit represents either a full or partial order that the payer intends to purchase from the payee.
     pub purchase_units: Vec<PurchaseUnit>,
-    /// Customize the payer experience during the approval process for the payment with PayPal. 
+    /// Customize the payer experience during the approval process for the payment with PayPal.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub application_context: Option<ApplicationContext>,
 }
@@ -618,8 +618,8 @@ impl OrderPayload {
     }
 }
 
-/// The card brand or network. 
-#[derive(Debug, Serialize, Deserialize)]
+/// The card brand or network.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardBrand {
     /// Visa card.
@@ -656,28 +656,28 @@ pub enum CardBrand {
     ChinaUnionPay,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardType {
     Credit,
     Debit,
     Prepaid,
-    Unknown
+    Unknown,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CardResponse {
-    /// The last digits of the payment card. 
+    /// The last digits of the payment card.
     pub last_digits: String,
     /// The card brand or network.
     pub brand: CardBrand,
-    #[serde(rename = "type")] 
+    #[serde(rename = "type")]
     pub card_type: CardType,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WalletResponse {
-    pub apple_pay: CardResponse
+    pub apple_pay: CardResponse,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -686,7 +686,7 @@ pub struct PaymentSourceResponse {
     pub wallet: WalletResponse,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderStatus {
     /// The order was created with the specified context.
@@ -702,7 +702,7 @@ pub enum OrderStatus {
     Completed,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LinkMethod {
     Get,
@@ -712,17 +712,16 @@ pub enum LinkMethod {
     Head,
     Connect,
     Options,
-    Patch
+    Patch,
 }
-
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct LinkDescription {
-    /// The complete target URL. 
+    /// The complete target URL.
     pub href: String,
     /// The link relation type, which serves as an ID for a link that unambiguously describes the semantics of the link.
     pub rel: String,
-    /// The HTTP method required to make the related call. 
+    /// The HTTP method required to make the related call.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub method: Option<LinkMethod>,
 }
@@ -743,45 +742,189 @@ pub struct Order {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub intent: Option<Intent>,
-    /// The customer who approves and pays for the order. The customer is also known as the payer. 
+    /// The customer who approves and pays for the order. The customer is also known as the payer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a customer and merchant.
-    /// Each purchase unit represents either a full or partial order that the customer intends to purchase from the merchant. 
+    /// Each purchase unit represents either a full or partial order that the customer intends to purchase from the merchant.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purchase_units: Option<Vec<PurchaseUnit>>,
     /// The order status.
     pub status: OrderStatus,
-    /// An array of request-related HATEOAS links. To complete payer approval, use the approve link to redirect the payer. 
+    /// An array of request-related HATEOAS links. To complete payer approval, use the approve link to redirect the payer.
     pub links: Vec<LinkDescription>,
 }
 
 impl super::Client {
-    /// Creates an order. Supports orders with only one purchase unit. 
-    pub async fn create_order(&self, order: OrderPayload, header_params: crate::HeaderParams) -> Result<Order, Box<dyn std::error::Error>> {
-        let builder = self.setup_headers(self.client.post(format!("{}/v2/checkout/orders", self.endpoint()).as_str()), header_params);
+    /// Creates an order. Supports orders with only one purchase unit.
+    pub async fn create_order(
+        &self,
+        order: OrderPayload,
+        header_params: crate::HeaderParams,
+    ) -> Result<Order, Box<dyn std::error::Error>> {
+        let builder = {
+            self.setup_headers(
+                self.client
+                    .post(format!("{}/v2/checkout/orders", self.endpoint()).as_str()),
+                header_params,
+            )
+        };
         let res = builder.json(&order).send().await?;
 
         if res.status().is_success() {
-            let order: Order = res.json::<Order>().await?;
+            let order = res.json::<Order>().await?;
             Ok(order)
         } else {
-            Err(Box::new(errors::Errors::ApiCallFailure))
+            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
+        }
+    }
+
+    /// Used internally for order requests that have no body.
+    async fn build_endpoint_order<S: std::fmt::Display, A: std::fmt::Display>(
+        &self,
+        order_id: S,
+        endpoint: A,
+        post: bool,
+        header_params: crate::HeaderParams,
+    ) -> Result<Order, Box<dyn std::error::Error>> {
+        let format = format!("{}/v2/checkout/orders/{}/{}", self.endpoint(), order_id, endpoint);
+
+        let builder = self.setup_headers(
+            match post {
+                true => self.client.post(format.as_str()),
+                false => self.client.get(format.as_str()),
+            },
+            header_params,
+        );
+
+        let res = builder.send().await?;
+
+        if res.status().is_success() {
+            let order = res.json::<Order>().await?;
+            Ok(order)
+        } else {
+            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
         }
     }
 
     /// Updates an order with the CREATED or APPROVED status.
-    ///
     /// You cannot update an order with the COMPLETED status.
     ///
-    /// TODO: Use a enum for status. https://developer.paypal.com/docs/api/orders/v2/#orders_patch
-    pub async fn update_order<S: AsRef<str>>(&self, id: S, status: S) {
-        todo!()
+    /// Only replacing the existing purchase units and intent is supported right now.
+    ///
+    /// Note: You can only update the intent from Authorize to Capture
+    ///
+    /// More info on what you can change: https://developer.paypal.com/docs/api/orders/v2/#orders_patch
+    pub async fn update_order<S: std::fmt::Display>(
+        &self,
+        id: S,
+        intent: Option<Intent>,
+        purchase_units: Option<Vec<PurchaseUnit>>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut intent_json = String::new();
+        let units_json = String::new();
+
+        if let Some(p_units) = purchase_units {
+            let mut units_json = String::new();
+
+            for (i, unit) in p_units.iter().enumerate() {
+                let unit_str = serde_json::to_string(&unit)?;
+                let mut unit_json = format!(r#"
+                {{
+                    "op": "replace",
+                    "path": "/purchase_units/@reference_id='{reference_id}'",
+                    "value": {unit}
+                }}
+                "#,
+                reference_id = unit.reference_id.clone().unwrap_or(String::from("default")),
+                unit = unit_str);
+
+                if i < p_units.len() - 1 {
+                    unit_json += ",";
+                }
+
+                units_json += unit_json.as_str();
+            }
+        }
+
+        if let Some(x) = intent {
+            let intent_str = match x {
+                Intent::Authorize => String::from("AUTHORIZE"),
+                Intent::Capture => String::from("CAPTURE")
+            };
+
+            intent_json = format!(
+                r#"
+                {{
+                    "op": "replace",
+                    "path": "/intent",
+                    "value": "{intent}"
+                }}
+                "#,
+                intent = intent_str
+            );
+        }
+
+        let final_json = {
+            if intent_json != "" && units_json != "" {
+                format!("[{},{}]", intent_json, units_json)
+            } else {
+                format!("[{}{}]", intent_json, units_json)
+            }
+        };
+
+        let builder = {
+            self.setup_headers(
+                self.client
+                    .patch(format!("{}/v2/checkout/orders/{}", self.endpoint(), id).as_str()),
+                crate::HeaderParams {
+                    content_type: Some(String::from("application/json")),
+                    ..Default::default()
+                },
+            )
+        };
+
+        let res = builder.body(final_json.clone()).send().await?;
+
+        if res.status().is_success() {
+            Ok(())
+        } else {
+            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
+        }
     }
 
-    pub async fn get_order<S: AsRef<str>>(id: S) {
-        todo!()
+    /// Shows details for an order, by ID.
+    pub async fn show_order_details<S: std::fmt::Display>(
+        &self,
+        order_id: S,
+    ) -> Result<Order, Box<dyn std::error::Error>> {
+        self.build_endpoint_order(order_id, "", false, crate::HeaderParams::default())
+            .await
+    }
+
+    /// Captures payment for an order. To successfully capture payment for an order,
+    /// the buyer must first approve the order or a valid payment_source must be provided in the request.
+    /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
+    pub async fn capture_order<S: std::fmt::Display>(
+        &self,
+        order_id: S,
+        header_params: crate::HeaderParams,
+    ) -> Result<Order, Box<dyn std::error::Error>> {
+        self.build_endpoint_order(order_id, "capture", true, header_params)
+            .await
+    }
+
+    /// Authorizes payment for an order. To successfully authorize payment for an order,
+    /// the buyer must first approve the order or a valid payment_source must be provided in the request.
+    /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
+    pub async fn authorize_order<S: std::fmt::Display>(
+        &self,
+        order_id: S,
+        header_params: crate::HeaderParams,
+    ) -> Result<Order, Box<dyn std::error::Error>> {
+        self.build_endpoint_order(order_id, "authorize", true, header_params)
+            .await
     }
 }
 
-// TODO: Finish order https://developer.paypal.com/docs/api/orders/v2/
+// TODO: Add strong typed support for order errors in body: https://developer.paypal.com/docs/api/orders/v2/#errors

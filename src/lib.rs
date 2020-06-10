@@ -279,11 +279,10 @@ impl Client {
             let token = res.json::<AccessToken>().await?;
             self.auth.expires = Some((Instant::now(), Duration::new(token.expires_in, 0)));
             self.auth.access_token = Some(token);
+            Ok(())
         } else {
-            return Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)));
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
         }
-
-        Ok(())
     }
 
     /// Checks if the access token expired.

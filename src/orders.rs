@@ -311,6 +311,7 @@ pub struct Item {
     pub category: Option<ItemCategoryType>,
 }
 
+/// The status of the payment authorization.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatus {
@@ -332,6 +333,7 @@ pub enum AuthorizationStatus {
     Pending,
 }
 
+/// Details about the status of the authorization.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatusDetails {
@@ -339,6 +341,7 @@ pub enum AuthorizationStatusDetails {
     PendingReview,
 }
 
+/// A payment authorization.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct AuthorizationWithData {
     /// The status for the authorized payment.
@@ -347,6 +350,7 @@ pub struct AuthorizationWithData {
     pub status_details: AuthorizationStatusDetails,
 }
 
+/// The capture status.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatus {
@@ -362,6 +366,7 @@ pub enum CaptureStatus {
     Refunded,
 }
 
+/// Details about the captured payment status.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatusDetails {
@@ -393,6 +398,7 @@ pub enum CaptureStatusDetails {
     VerificationRequired,
 }
 
+/// A captured payment.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Capture {
     /// The status of the captured payment.
@@ -401,6 +407,7 @@ pub struct Capture {
     pub status_details: CaptureStatusDetails,
 }
 
+/// The status of the refund
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RefundStatus {
@@ -420,6 +427,7 @@ pub enum RefundStatusDetails {
     Echeck,
 }
 
+/// A refund
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Refund {
     /// The status of the refund.
@@ -428,6 +436,7 @@ pub struct Refund {
     pub status_details: RefundStatusDetails,
 }
 
+/// The comprehensive history of payments for the purchase unit.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentCollection {
     /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
@@ -438,6 +447,7 @@ pub struct PaymentCollection {
     pub refunds: Vec<Refund>,
 }
 
+/// Represents either a full or partial order that the payer intends to purchase from the payee. 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PurchaseUnit {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
@@ -488,11 +498,13 @@ pub struct PurchaseUnit {
     /// The name and address of the person to whom to ship the items.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping: Option<ShippingDetail>,
+    /// The comprehensive history of payments for the purchase unit.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payments: Option<PaymentCollection>,
 }
 
 impl PurchaseUnit {
+    /// Creates a new PurchaseUnit with the required properties.
     pub fn new(amount: Amount) -> Self {
         Self {
             amount,
@@ -798,7 +810,7 @@ impl super::Client {
             let order = res.json::<Order>().await?;
             Ok(order)
         } else {
-            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
         }
     }
 
@@ -826,7 +838,7 @@ impl super::Client {
             let order = res.json::<Order>().await?;
             Ok(order)
         } else {
-            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
         }
     }
 
@@ -912,7 +924,7 @@ impl super::Client {
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(Box::new(errors::Errors::ApiCallFailure(res.text().await?)))
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
         }
     }
 

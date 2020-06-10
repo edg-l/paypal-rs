@@ -151,13 +151,13 @@ struct AuthAssertionClaims {
 impl Client {
     /// Returns a new client, you must get_access_token afterwards to interact with the api.
     ///
-    /// Example:
+    /// # Examples
     ///
     /// ```
-    /// let clientid = env::var("PAYPAL_CLIENTID").unwrap();
-    /// let secret = env::var("PAYPAL_SECRET").unwrap();
+    /// let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
+    /// let secret = std::env::var("PAYPAL_SECRET").unwrap();
     ///
-    /// let mut client = Client::new(
+    /// let mut client = paypal_rs::Client::new(
     ///     clientid.as_str(),
     ///     secret.as_str(),
     ///     true,

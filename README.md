@@ -56,13 +56,12 @@ You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
 
 ## TODO
 
-- [ ] Orders API
+- [x] Orders API
 - - [x] Create order
 - - [x] Update order
 - - [x] Show order details
 - - [x] Authorize payment for order
 - - [x] Capture payment for order
-- - [ ] Error messages
 - [ ] Invoicing API
 - [ ] Tracking API
 - [ ] Subscriptions API

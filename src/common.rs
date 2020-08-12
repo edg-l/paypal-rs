@@ -1,4 +1,4 @@
-/// Common paypal object definitions used amon 2 or more APIs
+//! Common paypal object definitions used amon 2 or more APIs
 
 use serde::{Serialize, Deserialize};
 
@@ -79,4 +79,30 @@ pub struct Money {
     ///
     /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
     pub value: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[allow(missing_docs)]
+pub enum LinkMethod {
+    Get,
+    Post,
+    Put,
+    Delete,
+    Head,
+    Connect,
+    Options,
+    Patch,
+}
+
+/// A HTOAES link
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct LinkDescription {
+    /// The complete target URL.
+    pub href: String,
+    /// The link relation type, which serves as an ID for a link that unambiguously describes the semantics of the link.
+    pub rel: String,
+    /// The HTTP method required to make the related call.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub method: Option<LinkMethod>,
 }

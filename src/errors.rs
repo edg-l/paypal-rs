@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::error::Error;
 use serde::{Deserialize, Serialize};
-use crate::objects::LinkDescription;
+use crate::common::LinkDescription;
 
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]

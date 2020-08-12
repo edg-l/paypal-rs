@@ -1,13 +1,13 @@
-//! # paypal-rs 
+//! # paypal-rs
 //! ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
 //! ![Docs](https://docs.rs/paypal-rs/badge.svg)
-//! 
+//!
 //! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
-//! 
+//!
 //! Crate: https://crates.io/crates/paypal-rs
-//! 
+//!
 //! Documentation: https://docs.rs/paypal-rs
-//! 
+//!
 //! Currently in early development.
 
 #![deny(missing_docs)]
@@ -18,6 +18,8 @@ mod tests;
 extern crate chrono;
 
 pub mod errors;
+pub mod invoice;
+pub mod common;
 pub mod orders;
 
 use reqwest::header;
@@ -175,8 +177,8 @@ impl Client {
     /// let secret = std::env::var("PAYPAL_SECRET").unwrap();
     ///
     /// let mut client = paypal_rs::Client::new(
-    ///     clientid.as_str(),
-    ///     secret.as_str(),
+    ///     clientid,
+    ///     secret,
     ///     true,
     /// );
     /// client.get_access_token().await.unwrap();
@@ -211,7 +213,7 @@ impl Client {
         if let Some(token) = &self.auth.access_token {
             headers.append(
                 header::AUTHORIZATION,
-                format!("Bearer {}", token.access_token).as_str().parse().unwrap(),
+                format!("Bearer {}", token.access_token).parse().unwrap(),
             );
         }
 
@@ -228,25 +230,19 @@ impl Client {
             )
             .unwrap();
             let encoded_token = base64::encode(token);
-            headers.append("PayPal-Auth-Assertion", encoded_token.as_str().parse().unwrap());
+            headers.append("PayPal-Auth-Assertion", encoded_token.parse().unwrap());
         }
 
         if let Some(client_metadata_id) = header_params.client_metadata_id {
-            headers.append(
-                "PayPal-Client-Metadata-Id",
-                client_metadata_id.as_str().parse().unwrap(),
-            );
+            headers.append("PayPal-Client-Metadata-Id", client_metadata_id.parse().unwrap());
         }
 
         if let Some(partner_attribution_id) = header_params.partner_attribution_id {
-            headers.append(
-                "PayPal-Partner-Attribution-Id",
-                partner_attribution_id.as_str().parse().unwrap(),
-            );
+            headers.append("PayPal-Partner-Attribution-Id", partner_attribution_id.parse().unwrap());
         }
 
         if let Some(request_id) = header_params.request_id {
-            headers.append("PayPal-Request-Id", request_id.as_str().parse().unwrap());
+            headers.append("PayPal-Request-Id", request_id.parse().unwrap());
         }
 
         if let Some(prefer) = header_params.prefer {
@@ -257,7 +253,7 @@ impl Client {
         }
 
         if let Some(content_type) = header_params.content_type {
-            headers.append(header::CONTENT_TYPE, content_type.as_str().parse().unwrap());
+            headers.append(header::CONTENT_TYPE, content_type.parse().unwrap());
         }
 
         builder.headers(headers)
@@ -268,7 +264,7 @@ impl Client {
         let res = self
             .client
             .post(format!("{}/v1/oauth2/token", self.endpoint()).as_str())
-            .basic_auth(self.auth.client_id.as_str(), Some(self.auth.secret.as_str()))
+            .basic_auth(&self.auth.client_id, Some(&self.auth.secret))
             .header("Content-Type", "x-www-form-urlencoded")
             .header("Accept", "application/json")
             .body("grant_type=client_credentials")

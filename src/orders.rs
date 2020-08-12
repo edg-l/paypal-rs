@@ -6,6 +6,7 @@
 
 use crate::errors;
 use serde::{Deserialize, Serialize};
+use crate::common::*;
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -39,20 +40,6 @@ pub struct PayerName {
     pub surname: String,
 }
 
-/// The phone type.
-///
-/// https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[allow(missing_docs)]
-pub enum PhoneType {
-    Fax,
-    Home,
-    Mobile,
-    Other,
-    Pager,
-}
-
 /// The phone number, in its canonical international E.164 numbering plan format.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct PhoneNumber {
@@ -66,7 +53,7 @@ pub struct PhoneNumber {
 /// Contact Telephone Number option in the Profile & Settings for the merchant's PayPal account.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Phone {
-    /// The phone type. 
+    /// The phone type.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_type: Option<PhoneType>,
     /// The phone number
@@ -92,30 +79,6 @@ pub struct TaxInfo {
     pub tax_id: String,
     /// The customer's tax ID type. Supported for the PayPal payment method only.
     pub tax_id_type: TaxIdType,
-}
-
-/// The address of the payer.
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct Address {
-    /// The first line of the address. For example, number or street. For example, 173 Drury Lane.
-    /// Required for data entry and compliance and risk checks. Must contain the full address.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub address_line_1: Option<String>,
-    /// The second line of the address. For example, suite or apartment number.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub address_line_2: Option<String>,
-    /// A city, town, or village. Smaller than admin_area_level_1.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub admin_area_2: Option<String>,
-    /// The highest level sub-division in a country, which is usually a province, state, or ISO-3166-2 subdivision.
-    /// Format for postal delivery. For example, CA and not California.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub admin_area_1: Option<String>,
-    /// The postal code, which is the zip code or equivalent. Typically required for countries with a postal code or an equivalent.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub postal_code: Option<String>,
-    /// The two-character [ISO 3166-1](https://developer.paypal.com/docs/api/reference/country-codes/) code that identifies the country or region.
-    pub country_code: String,
 }
 
 /// The customer who approves and pays for the order. The customer is also known as the payer.
@@ -145,19 +108,6 @@ pub struct Payer {
     /// The address of the payer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<Address>,
-}
-
-/// Represents money
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub struct Money {
-    /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    pub currency_code: String,
-    /// The value, which might be:
-    /// - An integer for currencies like JPY that are not typically fractional.
-    /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
-    ///
-    /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
-    pub value: String,
 }
 
 /// Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
@@ -228,7 +178,7 @@ pub struct Payee {
 /// Fees, commissions, tips, or donations
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PlatformFee {
-    /// The fee for this transaction. 
+    /// The fee for this transaction.
     pub amount: Money,
     #[serde(skip_serializing_if = "Option::is_none")]
     /// The merchant who receives payment for this transaction.
@@ -252,7 +202,7 @@ impl Default for DisbursementMode {
     }
 }
 
-/// Any additional payment instructions for PayPal Commerce Platform customers. 
+/// Any additional payment instructions for PayPal Commerce Platform customers.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations.
@@ -284,10 +234,10 @@ impl Default for ItemCategoryType {
 /// The name and address of the person to whom to ship the items.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ShippingDetail {
-    /// The name of the person to whom to ship the items. Supports only the full_name property. 
+    /// The name of the person to whom to ship the items. Supports only the full_name property.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    /// The address of the person to whom to ship the items. 
+    /// The address of the person to whom to ship the items.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<Address>,
 }
@@ -452,7 +402,7 @@ pub struct PaymentCollection {
     pub refunds: Vec<Refund>,
 }
 
-/// Represents either a full or partial order that the payer intends to purchase from the payee. 
+/// Represents either a full or partial order that the payer intends to purchase from the payee.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PurchaseUnit {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
@@ -598,7 +548,7 @@ impl Default for PayeePreferred {
 /// A payment method.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentMethod {
-    /// The customer-selected payment method on the merchant site. 
+    /// The customer-selected payment method on the merchant site.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payer_selected: Option<String>,
     /// The merchant-preferred payment sources.
@@ -606,7 +556,7 @@ pub struct PaymentMethod {
     pub payee_preferred: Option<PayeePreferred>,
 }
 
-/// Customize the payer experience during the approval process for the payment with PayPal. 
+/// Customize the payer experience during the approval process for the payment with PayPal.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site.
@@ -724,10 +674,10 @@ pub struct CardResponse {
     pub card_type: CardType,
 }
 
-/// The customer's wallet used to fund the transaction. 
+/// The customer's wallet used to fund the transaction.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WalletResponse {
-    /// Apple Pay Wallet response information. 
+    /// Apple Pay Wallet response information.
     pub apple_pay: CardResponse,
 }
 
@@ -736,25 +686,8 @@ pub struct WalletResponse {
 pub struct PaymentSourceResponse {
     /// The payment card to use to fund a payment. Card can be a credit or debit card
     pub card: CardResponse,
-    /// The customer's wallet used to fund the transaction. 
+    /// The customer's wallet used to fund the transaction.
     pub wallet: WalletResponse,
-}
-
-/// The status of an order.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum OrderStatus {
-    /// The order was created with the specified context.
-    Created,
-    /// The order was saved and persisted. The order status continues to be in progress until a capture
-    /// is made with final_capture = true for all purchase units within the order.
-    Saved,
-    /// The customer approved the payment through the PayPal wallet or another form of guest or unbranded payment. For example, a card, bank account, or so on.
-    Approved,
-    /// All purchase units in the order are voided.
-    Voided,
-    /// The payment was authorized or the authorized payment was captured for the order.
-    Completed,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -781,6 +714,23 @@ pub struct LinkDescription {
     /// The HTTP method required to make the related call.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub method: Option<LinkMethod>,
+}
+
+/// The status of an order.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OrderStatus {
+    /// The order was created with the specified context.
+    Created,
+    /// The order was saved and persisted. The order status continues to be in progress until a capture
+    /// is made with final_capture = true for all purchase units within the order.
+    Saved,
+    /// The customer approved the payment through the PayPal wallet or another form of guest or unbranded payment. For example, a card, bank account, or so on.
+    Approved,
+    /// All purchase units in the order are voided.
+    Voided,
+    /// The payment was authorized or the authorized payment was captured for the order.
+    Completed,
 }
 
 /// An order represents a payment between two or more parties.
@@ -823,7 +773,7 @@ impl super::Client {
         let builder = {
             self.setup_headers(
                 self.client
-                    .post(format!("{}/v2/checkout/orders", self.endpoint()).as_str()),
+                    .post(&format!("{}/v2/checkout/orders", self.endpoint())),
                 header_params,
             )
         };
@@ -849,8 +799,8 @@ impl super::Client {
 
         let builder = self.setup_headers(
             match post {
-                true => self.client.post(format.as_str()),
-                false => self.client.get(format.as_str()),
+                true => self.client.post(&format),
+                false => self.client.get(&format),
             },
             header_params,
         );
@@ -901,7 +851,7 @@ impl super::Client {
                     unit_json += ",";
                 }
 
-                units_json += unit_json.as_str();
+                units_json.push_str(&unit_json);
             }
         }
 
@@ -934,7 +884,7 @@ impl super::Client {
         let builder = {
             self.setup_headers(
                 self.client
-                    .patch(format!("{}/v2/checkout/orders/{}", self.endpoint(), id).as_str()),
+                    .patch(&format!("{}/v2/checkout/orders/{}", self.endpoint(), id)),
                 crate::HeaderParams {
                     content_type: Some(String::from("application/json")),
                     ..Default::default()

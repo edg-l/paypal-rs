@@ -3,17 +3,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::error::Error;
 use serde::{Deserialize, Serialize};
-
-/// Represents a error HATEOAS link
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub struct ErrorLink {
-    /// The complete target URL.
-    pub href: String,
-     /// The link relation type, which serves as an ID for a link that unambiguously describes the semantics of the link.
-    pub rel: String,
-    /// The HTTP method required to make the related call.
-    pub method: String,
-}
+use crate::objects::LinkDescription;
 
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,7 +21,7 @@ pub struct ApiResponseError {
     /// Only available on Identity errors
     pub error_description: Option<String>,
     /// Links with more information about the error.
-    pub links: Vec<ErrorLink>,
+    pub links: Vec<LinkDescription>,
 }
 
 impl fmt::Display for ApiResponseError {

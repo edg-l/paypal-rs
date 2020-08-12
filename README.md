@@ -26,7 +26,7 @@ async fn main() {
     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
-    let mut client = Client::new(clientid.as_str(), secret.as_str(), true);
+    let mut client = Client::new(clientid, secret, true);
 
     client.get_access_token().await.unwrap();
 

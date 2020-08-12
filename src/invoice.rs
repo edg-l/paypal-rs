@@ -9,7 +9,8 @@
 use crate::common::*;
 use crate::errors;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap};
+use bytes::Bytes;
 
 /// Paypal File reference
 #[derive(Debug, Serialize, Deserialize)]
@@ -384,9 +385,9 @@ pub struct ShippingCost {
 /// The custom amount to apply to an invoice
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct CustomAmount {
-    /// The label to the custom amount of the invoice. 
+    /// The label to the custom amount of the invoice.
     pub label: String,
-    /// The custom amount value. Value is from -1000000 to 1000000. Supports up to two decimal places. 
+    /// The custom amount value. Value is from -1000000 to 1000000. Supports up to two decimal places.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<Money>,
 }
@@ -400,13 +401,13 @@ pub struct Breakdown {
     /// The discount can be at the item or invoice level, or both. Can be applied as a percent or amount. If you provide both amount and percent, amount takes precedent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub discount: Option<AggregatedDiscount>,
-    /// The aggregated amount of the item and shipping taxes. 
+    /// The aggregated amount of the item and shipping taxes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_total: Option<Money>,
     /// The shipping fee for all items. Includes tax on shipping.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping: Option<ShippingCost>,
-    /// The custom amount to apply to an invoice. If you include a label, you must include the custom amount. 
+    /// The custom amount to apply to an invoice. If you include a label, you must include the custom amount.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomAmount>,
 }
@@ -438,7 +439,7 @@ impl Amount {
     }
 }
 
-/// The payment type in an invoicing flow 
+/// The payment type in an invoicing flow
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PaymentType {
@@ -476,7 +477,7 @@ pub struct PaymentDetail {
     /// The payment type in an invoicing flow which can be PayPal or an external cash or check payment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub r#type: Option<PaymentType>,
-    /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type. 
+    /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_id: Option<String>,
     /// The date when the invoice was paid, in Internet date and time format.
@@ -484,13 +485,13 @@ pub struct PaymentDetail {
     pub payment_date: Option<chrono::DateTime<chrono::Utc>>,
     /// The payment mode or method through which the invoicer can accept the payment.
     pub method: PaymentMethod,
-    /// A note associated with an external cash or check payment. 
+    /// A note associated with an external cash or check payment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
-    /// The payment amount to record against the invoice. If you omit this parameter, the total invoice amount is marked as paid. This amount cannot exceed the amount due. 
+    /// The payment amount to record against the invoice. If you omit this parameter, the total invoice amount is marked as paid. This amount cannot exceed the amount due.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<Money>,
-    /// The recipient's shipping information. Includes the user's contact information, which includes name and address. 
+    /// The recipient's shipping information. Includes the user's contact information, which includes name and address.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping_info: Option<ContactInformation>,
 }
@@ -498,7 +499,7 @@ pub struct PaymentDetail {
 /// Payments registered against the invoice
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Payments {
-    /// The aggregated payment amounts against this invoice. 
+    /// The aggregated payment amounts against this invoice.
     /// Read only.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub paid_amount: Option<Money>,
@@ -511,16 +512,16 @@ pub struct Payments {
 /// Refund details
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RefundDetail {
-    /// The PayPal refund type. Indicates whether the refund was paid through PayPal or externally in the invoicing flow. 
+    /// The PayPal refund type. Indicates whether the refund was paid through PayPal or externally in the invoicing flow.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub r#type: Option<PaymentType>,
-    /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type. 
+    /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refund_id: Option<String>,
     /// The date when the invoice was refunded, in Internet date format.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refund_date: Option<chrono::DateTime<chrono::Utc>>,
-    /// The amount to record as refunded. If you omit the amount, the total invoice paid amount is recorded as refunded. 
+    /// The amount to record as refunded. If you omit the amount, the total invoice paid amount is recorded as refunded.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<Money>,
     /// The payment mode or method through which the invoicer can accept the payments.
@@ -534,7 +535,7 @@ pub struct Refunds {
     /// Read only.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refund_amount: Option<Money>,
-    /// An array of refund details for the invoice. Includes the refund type, date, amount, and method. 
+    /// An array of refund details for the invoice. Includes the refund type, date, amount, and method.
     /// Read only.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transactions: Option<Vec<RefundDetail>>,
@@ -590,13 +591,13 @@ pub struct InvoicePayload {
     /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub configuration: Option<Configuration>,
-    /// The invoice amount summary of item total, discount, tax total and shipping.. 
+    /// The invoice amount summary of item total, discount, tax total and shipping..
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<Amount>,
     /// List of payments registered against the invoice.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payments: Option<Payments>,
-    /// List of refunds against this invoice. The invoicing refund details includes refund type, date, amount, and method. 
+    /// List of refunds against this invoice. The invoicing refund details includes refund type, date, amount, and method.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refunds: Option<Refunds>,
 }
@@ -604,42 +605,42 @@ pub struct InvoicePayload {
 /// Definition: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_get
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Invoice {
-    /// The ID of the invoice. 
+    /// The ID of the invoice.
     pub id: String,
-    /// The parent ID to an invoice that defines the group invoice to which the invoice is related. 
+    /// The parent ID to an invoice that defines the group invoice to which the invoice is related.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
-    /// The status of the invoice. 
+    /// The status of the invoice.
     pub status: Status,
-    /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata. 
+    /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,
-    /// The invoicer information. Includes the business name, email, address, phone, fax, tax ID, additional notes, and logo URL. 
+    /// The invoicer information. Includes the business name, email, address, phone, fax, tax ID, additional notes, and logo URL.
     pub invoicer: InvoicerInfo,
-    /// The billing and shipping information. Includes name, email, address, phone and language. 
+    /// The billing and shipping information. Includes name, email, address, phone and language.
     pub primary_recipients: Vec<RecipientInfo>,
     /// An array of one or more CC: emails to which notifications are sent.
     /// If you omit this parameter, a notification is sent to all CC: email addresses that are part of the invoice.
     pub additional_recipients: Option<Vec<String>>,
-    /// An array of invoice line item information. 
+    /// An array of invoice line item information.
     pub items: Option<Vec<Item>>,
-    /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount. 
+    /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub configuration: Option<Configuration>,
-    /// The invoice amount summary of item total, discount, tax total and shipping.. 
+    /// The invoice amount summary of item total, discount, tax total and shipping..
     pub amount: Amount,
-    /// The due amount, which is the balance amount outstanding after payments. 
+    /// The due amount, which is the balance amount outstanding after payments.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub due_amount: Option<Money>,
-    /// The amount paid by the payer as gratuity to the invoicer. 
+    /// The amount paid by the payer as gratuity to the invoicer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub gratuity: Option<Money>,
-    /// List of payments registered against the invoice.. 
+    /// List of payments registered against the invoice..
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payments: Option<Payments>,
-    /// List of refunds against this invoice. The invoicing refund details includes refund type, date, amount, and method. 
+    /// List of refunds against this invoice. The invoicing refund details includes refund type, date, amount, and method.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refunds: Option<Refunds>,
-    /// An array of request-related HATEOAS links. 
+    /// An array of request-related HATEOAS links.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<LinkDescription>>,
 }
@@ -652,9 +653,48 @@ pub struct InvoiceList {
     /// Total pages
     pub total_pages: i32,
     /// The invoices
-    items: Vec<Invoice>,
+    pub items: Vec<Invoice>,
     /// HATEOAS links
-    links: Vec<LinkDescription>,
+    pub links: Vec<LinkDescription>,
+}
+
+/// Cancel invoice reason
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct CancelReason {
+    /// The subject of the email that is sent as a notification to the recipient.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
+    /// A note to the payer.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    /// Indicates whether to send a copy of the email to the merchant.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub send_to_invoicer: Option<bool>,
+    /// Indicates whether to send a copy of the email to the recipient.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub send_to_recipient: Option<bool>,
+    /// An array of one or more CC: emails to which notifications are sent.
+    /// If you omit this parameter, a notification is sent to all CC: email addresses that are part of the invoice.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub additional_recipients: Option<Vec<String>>,
+}
+
+/// QR pay action
+pub const QR_ACTION_PAY: &str = "pay";
+/// QR details action
+pub const QR_ACTION_DETAILS: &str ="details";
+
+/// QR creation parameters
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct QRCodeParams {
+    /// The width, in pixels, of the QR code image. Value is from 150 to 500. 
+    pub width: i32,
+    /// The height, in pixels, of the QR code image. Value is from 150 to 500. 
+    pub height: i32,
+    /// The type of URL for which to generate a QR code. Valid values are pay and details. 
+    ///
+    /// Check QR_ACTION_PAY and QR_ACTION_DETAILS constants
+    pub action: Option<String>,
 }
 
 impl super::Client {
@@ -728,7 +768,7 @@ impl super::Client {
         }
     }
 
-    /// Get an invoice by ID.
+    /// List invoices
     /// Page size has the following limits: [1, 100].
     pub async fn list_invoices(
         &self,
@@ -737,8 +777,15 @@ impl super::Client {
         page_size: i32,
     ) -> Result<InvoiceList, Box<dyn std::error::Error>> {
         let build = self.setup_headers(
-            self.client
-                .get(format!("{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true", self.endpoint(), page, page_size).as_str()),
+            self.client.get(
+                format!(
+                    "{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true",
+                    self.endpoint(),
+                    page,
+                    page_size
+                )
+                .as_str(),
+            ),
             header_params,
         );
 
@@ -751,4 +798,103 @@ impl super::Client {
             Err(Box::new(res.json::<errors::ApiResponseError>().await?))
         }
     }
+
+    /// Delete a invoice
+    pub async fn delete_invoice<S: std::fmt::Display>(
+        &self,
+        header_params: crate::HeaderParams,
+        invoice_id: S,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client
+                .delete(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
+            header_params,
+        );
+
+        let res = build.send().await?;
+
+        if res.status().is_success() {
+            Ok(())
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    /// Update a invoice
+    pub async fn update_invoice(
+        &self,
+        header_params: crate::HeaderParams,
+        invoice: Invoice,
+        send_to_recipient: bool,
+        send_to_invoicer: bool,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client.put(
+                format!(
+                    "{}/v2/invoicing/invoices/{}?send_to_recipient={}&send_to_invoicer={}",
+                    self.endpoint(),
+                    invoice.id,
+                    send_to_recipient,
+                    send_to_invoicer
+                )
+                .as_str(),
+            ),
+            header_params,
+        );
+
+        let res = build.send().await?;
+
+        if res.status().is_success() {
+            Ok(())
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    /// Cancel a invoice
+    pub async fn cancel_invoice<S: std::fmt::Display>(
+        &self,
+        header_params: crate::HeaderParams,
+        invoice_id: S,
+        reason: CancelReason,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client
+                .post(format!("{}/v2/invoicing/invoices/{}/cancel", self.endpoint(), invoice_id,).as_str()),
+            header_params,
+        );
+
+        let res = build.json(&reason).send().await?;
+
+        if res.status().is_success() {
+            Ok(())
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    /// Generate a QR code
+    pub async fn generate_qr_code<S: std::fmt::Display>(
+        &self,
+        header_params: crate::HeaderParams,
+        invoice_id: S,
+        params: QRCodeParams,
+    ) -> Result<Bytes, Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client
+                .post(format!("{}/v2/invoicing/invoices/{}/generate-qr-code", self.endpoint(), invoice_id).as_str()),
+            header_params,
+        );
+
+        let res = build.json(&params).send().await?;
+
+        if res.status().is_success() {
+            let b = res.bytes().await?;
+            Ok(b)
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    // TODO: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_payments
 }

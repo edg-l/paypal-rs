@@ -644,6 +644,19 @@ pub struct Invoice {
     pub links: Option<Vec<LinkDescription>>,
 }
 
+/// A invoice list
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InvoiceList {
+    /// Total items
+    pub total_items: i32,
+    /// Total pages
+    pub total_pages: i32,
+    /// The invoices
+    items: Vec<Invoice>,
+    /// HATEOAS links
+    links: Vec<LinkDescription>,
+}
+
 impl super::Client {
     /// Generates the next invoice number that is available to the merchant.
     ///
@@ -709,6 +722,30 @@ impl super::Client {
 
         if res.status().is_success() {
             let x = res.json::<Invoice>().await?;
+            Ok(x)
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    /// Get an invoice by ID.
+    /// Page size has the following limits: [1, 100].
+    pub async fn list_invoices(
+        &self,
+        header_params: crate::HeaderParams,
+        page: i32,
+        page_size: i32,
+    ) -> Result<InvoiceList, Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client
+                .get(format!("{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true", self.endpoint(), page, page_size).as_str()),
+            header_params,
+        );
+
+        let res = build.send().await?;
+
+        if res.status().is_success() {
+            let x = res.json::<InvoiceList>().await?;
             Ok(x)
         } else {
             Err(Box::new(res.json::<errors::ApiResponseError>().await?))

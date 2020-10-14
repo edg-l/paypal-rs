@@ -12,14 +12,9 @@
 
 #![deny(missing_docs)]
 
-#[cfg(test)]
-mod tests;
-
-extern crate chrono;
-
+pub mod common;
 pub mod errors;
 pub mod invoice;
-pub mod common;
 pub mod orders;
 
 use reqwest::header;
@@ -81,6 +76,7 @@ pub struct Client {
 ///
 /// Note: You can avoid most fields by the Default impl like so:
 /// ```
+/// use paypal_rs::Query;
 /// let query = Query { count: Some(40), ..Default::default() };
 /// ```
 #[derive(Debug, Default, Serialize)]
@@ -173,15 +169,21 @@ impl Client {
     /// # Examples
     ///
     /// ```
-    /// let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
-    /// let secret = std::env::var("PAYPAL_SECRET").unwrap();
+    /// use paypal_rs::Client;
     ///
-    /// let mut client = paypal_rs::Client::new(
-    ///     clientid,
-    ///     secret,
-    ///     true,
-    /// );
-    /// client.get_access_token().await.unwrap();
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     # dotenv::dotenv().ok();
+    ///     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
+    ///     let secret = std::env::var("PAYPAL_SECRET").unwrap();
+    ///
+    ///     let mut client = Client::new(
+    ///         clientid,
+    ///         secret,
+    ///         true,
+    ///     );
+    ///     client.get_access_token().await.unwrap();
+    /// }
     /// ```
     pub fn new<S: Into<String>>(client_id: S, secret: S, sandbox: bool) -> Client {
         Client {
@@ -288,5 +290,62 @@ impl Client {
         } else {
             true
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{orders::*, Client, HeaderParams, Prefer};
+    use std::env;
+
+    async fn create_client() -> Client {
+        dotenv::dotenv().ok();
+        let clientid = env::var("PAYPAL_CLIENTID").unwrap();
+        let secret = env::var("PAYPAL_SECRET").unwrap();
+
+        let mut client = Client::new(clientid, secret, true);
+
+        assert_eq!(client.get_access_token().await.is_err(), false, "should not error");
+        client
+    }
+
+    #[tokio::test]
+    async fn test_order() {
+        let client = create_client().await;
+
+        let order = OrderPayload::new(Intent::Authorize, vec![PurchaseUnit::new(Amount::new("EUR", "10.0"))]);
+
+        let ref_id = format!(
+            "TEST-{:?}",
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+        );
+
+        let order_created = client
+            .create_order(
+                order,
+                HeaderParams {
+                    prefer: Some(Prefer::Representation),
+                    request_id: Some(ref_id.clone()),
+                    ..Default::default()
+                },
+            )
+            .await
+            .unwrap();
+
+        assert_ne!(order_created.id, "");
+        assert_eq!(order_created.status, OrderStatus::Created);
+        assert_eq!(order_created.links.len(), 4);
+
+        client
+            .update_order(
+                order_created.id,
+                Some(Intent::Capture),
+                Some(order_created.purchase_units.expect("to exist")),
+            )
+            .await
+            .unwrap();
     }
 }

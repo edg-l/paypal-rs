@@ -1,7 +1,6 @@
 //! Common paypal object definitions used amon 2 or more APIs
 
-use serde::{Serialize, Deserialize};
-
+use serde::{Deserialize, Serialize};
 
 /// The phone type.
 ///
@@ -20,23 +19,23 @@ pub enum PhoneType {
 /// The non-portable additional address details
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct AddressDetails {
-    /// The street number. 
+    /// The street number.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub street_number: Option<String>,
-    /// The street name. Just Drury in Drury Lane. 
+    /// The street name. Just Drury in Drury Lane.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub street_name: Option<String>,
-    /// The street type. For example, avenue, boulevard, road, or expressway. 
+    /// The street type. For example, avenue, boulevard, road, or expressway.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub street_type: Option<String>,
-    /// The delivery service. Post office box, bag number, or post office name. 
+    /// The delivery service. Post office box, bag number, or post office name.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delivery_service: Option<String>,
-    /// A named locations that represents the premise. Usually a building name or number or collection of buildings with a common name or number. For example, Craven House. 
+    /// A named locations that represents the premise. Usually a building name or number or collection of buildings with a common name or number. For example, Craven House.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub building_name: Option<String>,
     /// The first-order entity below a named building or location that represents the sub-premise.
-    /// Usually a single building within a collection of buildings with a common name. Can be a flat, story, floor, room, or apartment. 
+    /// Usually a single building within a collection of buildings with a common name. Can be a flat, story, floor, room, or apartment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sub_building: Option<String>,
 }
@@ -106,3 +105,4 @@ pub struct LinkDescription {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub method: Option<LinkMethod>,
 }
+

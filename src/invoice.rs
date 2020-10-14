@@ -471,6 +471,12 @@ pub enum PaymentMethod {
     Other,
 }
 
+impl Default for PaymentMethod {
+    fn default() -> Self {
+        PaymentMethod::Paypal
+    }
+}
+
 /// Payment detail
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentDetail {
@@ -697,6 +703,20 @@ pub struct QRCodeParams {
     pub action: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct RecordPaymentPayload {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    payment_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    payment_date: Option<chrono::DateTime<chrono::Utc>>,
+    method: PaymentMethod,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    note: Option<String>,
+    amount: Amount,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shipping_info: Option<ContactInformation>,
+}
+
 impl super::Client {
     /// Generates the next invoice number that is available to the merchant.
     ///
@@ -727,8 +747,8 @@ impl super::Client {
     /// Include invoice details including merchant information. The invoice object must include an items array.
     pub async fn create_draft_invoice(
         &self,
-        header_params: crate::HeaderParams,
         invoice: InvoicePayload,
+        header_params: crate::HeaderParams,
     ) -> Result<Invoice, Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client
@@ -749,8 +769,8 @@ impl super::Client {
     /// Get an invoice by ID.
     pub async fn get_invoice<S: std::fmt::Display>(
         &self,
-        header_params: crate::HeaderParams,
         invoice_id: S,
+        header_params: crate::HeaderParams,
     ) -> Result<Invoice, Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client
@@ -772,9 +792,9 @@ impl super::Client {
     /// Page size has the following limits: [1, 100].
     pub async fn list_invoices(
         &self,
-        header_params: crate::HeaderParams,
         page: i32,
         page_size: i32,
+        header_params: crate::HeaderParams,
     ) -> Result<InvoiceList, Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client.get(
@@ -802,8 +822,8 @@ impl super::Client {
     /// Delete a invoice
     pub async fn delete_invoice<S: std::fmt::Display>(
         &self,
-        header_params: crate::HeaderParams,
         invoice_id: S,
+        header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client
@@ -823,10 +843,10 @@ impl super::Client {
     /// Update a invoice
     pub async fn update_invoice(
         &self,
-        header_params: crate::HeaderParams,
         invoice: Invoice,
         send_to_recipient: bool,
         send_to_invoicer: bool,
+        header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client.put(
@@ -854,9 +874,9 @@ impl super::Client {
     /// Cancel a invoice
     pub async fn cancel_invoice<S: std::fmt::Display>(
         &self,
-        header_params: crate::HeaderParams,
         invoice_id: S,
         reason: CancelReason,
+        header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client
@@ -876,9 +896,9 @@ impl super::Client {
     /// Generate a QR code
     pub async fn generate_qr_code<S: std::fmt::Display>(
         &self,
-        header_params: crate::HeaderParams,
         invoice_id: S,
         params: QRCodeParams,
+        header_params: crate::HeaderParams,
     ) -> Result<Bytes, Box<dyn std::error::Error>> {
         let build = self.setup_headers(
             self.client
@@ -896,5 +916,28 @@ impl super::Client {
         }
     }
 
-    // TODO: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_payments
+    /// Records a payment for the invoice. If no payment is due, the invoice is marked as PAID. Otherwise, the invoice is marked as PARTIALLY PAID.
+    pub async fn record_invoice_payment<S: std::fmt::Display>(
+        &self,
+        invoice_id: S,
+        payload: RecordPaymentPayload,
+        header_params: crate::HeaderParams,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let build = self.setup_headers(
+            self.client
+                .post(format!("{}/v2/invoicing/invoices/{}/payments", self.endpoint(), invoice_id).as_str()),
+            header_params,
+        );
+
+        let res = build.json(&payload).send().await?;
+
+        if res.status().is_success() {
+            let x = res.json::<HashMap<String, String>>().await?;
+            Ok(x.get("payment_id").unwrap().to_owned())
+        } else {
+            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+        }
+    }
+
+    // TODO: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_payments-delete
 }

@@ -9,7 +9,7 @@
 use crate::common::*;
 use crate::errors;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap};
+use std::collections::HashMap;
 use bytes::Bytes;
 
 /// Paypal File reference

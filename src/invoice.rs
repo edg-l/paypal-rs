@@ -703,6 +703,7 @@ pub struct QRCodeParams {
     pub action: Option<String>,
 }
 
+/// Used to record a payment.
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct RecordPaymentPayload {
     #[serde(skip_serializing_if = "Option::is_none")]

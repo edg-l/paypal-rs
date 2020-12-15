@@ -818,7 +818,7 @@ impl super::Client {
                     "value": {unit}
                 }}
                 "#,
-                reference_id = unit.reference_id.clone().unwrap_or(String::from("default")),
+                reference_id = unit.reference_id.clone().unwrap_or_else(|| String::from("default")),
                 unit = unit_str);
 
                 if i < p_units.len() - 1 {

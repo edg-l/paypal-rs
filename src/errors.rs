@@ -31,3 +31,15 @@ impl fmt::Display for ApiResponseError {
 }
 
 impl Error for ApiResponseError {}
+
+/// When a currency is invalid.
+#[derive(Debug)]
+pub struct InvalidCurrencyError(pub String);
+
+impl fmt::Display for InvalidCurrencyError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+       write!(f, "{:?} is not a valid currency", self.0) 
+    }
+}
+
+impl Error for InvalidCurrencyError {}

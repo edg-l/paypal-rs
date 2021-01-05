@@ -308,6 +308,8 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use crate::{orders::*, Client, HeaderParams, Prefer};
+    use crate::common::Currency;
+    use std::str::FromStr;
     use std::env;
 
     async fn create_client() -> Client {
@@ -324,7 +326,7 @@ mod tests {
     async fn test_order() {
         let mut client = create_client().await;
 
-        let order = OrderPayload::new(Intent::Authorize, vec![PurchaseUnit::new(Amount::new("EUR", "10.0"))]);
+        let order = OrderPayload::new(Intent::Authorize, vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))]);
 
         let ref_id = format!(
             "TEST-{:?}",
@@ -358,5 +360,12 @@ mod tests {
             )
             .await
             .unwrap();
+    }
+
+    #[test]
+    fn test_currency() {
+        assert_eq!(Currency::EUR.to_string(), "EUR");
+        assert_eq!(Currency::JPY.to_string(), "JPY");
+        assert_eq!(Currency::JPY, Currency::from_str("JPY").unwrap());
     }
 }

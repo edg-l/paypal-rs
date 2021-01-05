@@ -1,6 +1,8 @@
 //! Common paypal object definitions used amon 2 or more APIs
 
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use crate::errors::InvalidCurrencyError;
 
 /// The phone type.
 ///
@@ -71,7 +73,7 @@ pub struct Address {
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    pub currency_code: String,
+    pub currency_code: Currency,
     /// The value, which might be:
     /// - An integer for currencies like JPY that are not typically fractional.
     /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
@@ -104,4 +106,107 @@ pub struct LinkDescription {
     /// The HTTP method required to make the related call.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub method: Option<LinkMethod>,
+}
+
+/// ISO-4217 currency codes.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub enum Currency {
+    /// Australian dollar
+    AUD,
+    /// Brazilian real, supported for in country paypal accounts only.
+    BRL,
+    /// Canadian dollar
+    CAD,
+    /// Chinese Renmenbi
+    CNY,
+    /// Czech koruna
+    CZK,
+    /// Danish krone
+    DKK,
+    /// Euro
+    EUR,
+    /// Hong Kong dollar
+    HKD,
+    /// Hungarian forint, does not support decimals.
+    HUF,
+    /// Indian rupee, supported for in country paypal india accounts only.
+    INR,
+    /// Israeli new shekel
+    ILS,
+    /// Japanese yen, does not support decimals.
+    JPY,
+    /// Malaysian ringgit
+    MYR,
+    /// Mexican peso
+    MXN,
+    /// New Taiwan dollar, does not support decimals.
+    TWD,
+    /// New Zealand dollar
+    NZD,
+    /// Norwegian krone
+    NOK,
+    /// Philippine peso
+    PHP,
+    /// Polish złoty
+    PLN,
+    /// Pound sterling
+    GBP,
+    /// Russian ruble
+    RUB,
+    /// Singapore dollar 
+    SGD,
+    /// Swedish krona
+    SEK,
+    /// Swiss franc
+    CHF,
+    /// Thai baht
+    THB,
+    /// United States dollar
+    USD
+}
+
+impl Default for Currency {
+    fn default() -> Self {
+        Self::EUR
+    }
+}
+
+impl std::fmt::Display for Currency {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(&self, f)
+    }
+}
+
+impl FromStr for Currency {
+    type Err = InvalidCurrencyError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "AUD" => Ok(Self::AUD),
+            "BRL" => Ok(Self::BRL),
+            "CAD" => Ok(Self::CAD),
+            "CNY" => Ok(Self::CNY),
+            "CZK" => Ok(Self::CZK),
+            "DKK" => Ok(Self::DKK),
+            "EUR" => Ok(Self::EUR),
+            "HKD" => Ok(Self::HKD),
+            "HUF" => Ok(Self::HUF),
+            "INR" => Ok(Self::INR),
+            "ILS" => Ok(Self::ILS),
+            "JPY" => Ok(Self::JPY),
+            "MYR" => Ok(Self::MYR),
+            "MXN" => Ok(Self::MXN),
+            "NOK" => Ok(Self::NOK),
+            "PHP" => Ok(Self::PHP),
+            "PLN" => Ok(Self::PLN),
+            "GBP" => Ok(Self::GBP),
+            "RUB" => Ok(Self::RUB),
+            "SGD" => Ok(Self::SGD),
+            "SEK" => Ok(Self::SGD),
+            "CHF" => Ok(Self::CHF),
+            "THB" => Ok(Self::THB),
+            "USD" => Ok(Self::USD),
+            cur => Err(InvalidCurrencyError(cur.to_owned()))
+        }
+    }
 }

@@ -141,7 +141,7 @@ pub struct Breakdown {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    pub currency_code: String,
+    pub currency_code: Currency,
     /// The value, which might be:
     /// - An integer for currencies like JPY that are not typically fractional.
     /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
@@ -155,10 +155,10 @@ pub struct Amount {
 
 impl Amount {
     /// Creates a new amount with the required values.
-    pub fn new<S: Into<String>>(currency_code: S, value: S) -> Self {
+    pub fn new(currency: Currency, value: &str) -> Self {
         Amount {
-            currency_code: currency_code.into(),
-            value: value.into(),
+            currency_code: currency,
+            value: value.to_owned(),
             breakdown: None,
         }
     }

@@ -3,13 +3,15 @@
 ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
 ![Docs](https://docs.rs/paypal-rs/badge.svg)
 
-A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
+A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a stringly typed manner.
 
 Crate: https://crates.io/crates/paypal-rs
 
 Documentation: https://docs.rs/paypal-rs
 
 Currently in early development.
+
+Note: This README shows how to use the prerelease version, to view the README for `0.1.0` go [here](https://github.com/edg-l/paypal-rs/tree/0.1.0).
 
 ## Example
 
@@ -18,7 +20,8 @@ use paypal_rs::{
     Client,
     HeaderParams,
     Prefer,
-    orders::{OrderPayload, Intent, PurchaseUnit, Amount}
+    orders::{OrderPayload, Intent, PurchaseUnit, Amount},
+    common::Currency,
 };
 
 #[tokio::main]
@@ -33,7 +36,7 @@ async fn main() {
     let order_payload = OrderPayload::new(
         Intent::Authorize,
         vec![PurchaseUnit::new(Amount::new(
-            "EUR", "10.0",
+            Currency::EUR, "10.0",
         ))],
     );
 

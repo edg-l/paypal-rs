@@ -23,9 +23,9 @@ use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
 
 /// The paypal api endpoint used on a live application.
-pub const LIVE_ENDPOINT: &str = "https://api.paypal.com";
+pub const LIVE_ENDPOINT: &str = "https://api-m.paypal.com";
 /// The paypal api endpoint used on when testing.
-pub const SANDBOX_ENDPOINT: &str = "https://api.sandbox.paypal.com";
+pub const SANDBOX_ENDPOINT: &str = "https://api-m.sandbox.paypal.com";
 
 /// Represents the access token returned by the OAuth2 authentication.
 ///
@@ -207,7 +207,16 @@ impl Client {
     }
 
     /// Sets up the request headers as required on https://developer.paypal.com/docs/api/reference/api-requests/#http-request-headers
-    fn setup_headers(&self, builder: reqwest::RequestBuilder, header_params: HeaderParams) -> reqwest::RequestBuilder {
+    async fn setup_headers(
+        &mut self,
+        builder: reqwest::RequestBuilder,
+        header_params: HeaderParams,
+    ) -> reqwest::RequestBuilder {
+        // Check if the token hasn't expired here, since it's called before any other call.
+        if let Err(e) = self.get_access_token().await {
+            log::warn!(target: "paypal-rs", "error getting access token: {:?}", e);
+        }
+
         let mut headers = HeaderMap::new();
 
         headers.append(header::ACCEPT, "application/json".parse().unwrap());
@@ -263,6 +272,9 @@ impl Client {
 
     /// Gets a access token used in all the api calls.
     pub async fn get_access_token(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        if !self.access_token_expired() {
+            return Ok(());
+        }
         let res = self
             .client
             .post(format!("{}/v1/oauth2/token", self.endpoint()).as_str())
@@ -303,15 +315,14 @@ mod tests {
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
         let secret = env::var("PAYPAL_SECRET").unwrap();
 
-        let mut client = Client::new(clientid, secret, true);
+        let client = Client::new(clientid, secret, true);
 
-        assert_eq!(client.get_access_token().await.is_err(), false, "should not error");
         client
     }
 
     #[tokio::test]
     async fn test_order() {
-        let client = create_client().await;
+        let mut client = create_client().await;
 
         let order = OrderPayload::new(Intent::Authorize, vec![PurchaseUnit::new(Amount::new("EUR", "10.0"))]);
 

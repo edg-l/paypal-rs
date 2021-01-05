@@ -1,12 +1,12 @@
 //! An order represents a payment between two or more parties.
 //!
-//! Use the Orders API to create, update, retrieve, authorize, and capture orders. 
+//! Use the Orders API to create, update, retrieve, authorize, and capture orders.
 //!
 //! Reference: https://developer.paypal.com/docs/api/orders/v2/
 
+use crate::common::*;
 use crate::errors;
 use serde::{Deserialize, Serialize};
-use crate::common::*;
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -740,16 +740,16 @@ pub struct Order {
 impl super::Client {
     /// Creates an order. Supports orders with only one purchase unit.
     pub async fn create_order(
-        &self,
+        &mut self,
         order: OrderPayload,
         header_params: crate::HeaderParams,
     ) -> Result<Order, Box<dyn std::error::Error>> {
         let builder = {
             self.setup_headers(
-                self.client
-                    .post(&format!("{}/v2/checkout/orders", self.endpoint())),
+                self.client.post(&format!("{}/v2/checkout/orders", self.endpoint())),
                 header_params,
             )
+            .await
         };
         let res = builder.json(&order).send().await?;
 
@@ -763,7 +763,7 @@ impl super::Client {
 
     /// Used internally for order requests that have no body.
     async fn build_endpoint_order<S: std::fmt::Display, A: std::fmt::Display>(
-        &self,
+        &mut self,
         order_id: S,
         endpoint: A,
         post: bool,
@@ -771,13 +771,15 @@ impl super::Client {
     ) -> Result<Order, Box<dyn std::error::Error>> {
         let format = format!("{}/v2/checkout/orders/{}/{}", self.endpoint(), order_id, endpoint);
 
-        let builder = self.setup_headers(
-            match post {
-                true => self.client.post(&format),
-                false => self.client.get(&format),
-            },
-            header_params,
-        );
+        let builder = self
+            .setup_headers(
+                match post {
+                    true => self.client.post(&format),
+                    false => self.client.get(&format),
+                },
+                header_params,
+            )
+            .await;
 
         let res = builder.send().await?;
 
@@ -798,7 +800,7 @@ impl super::Client {
     ///
     /// More info on what you can change: https://developer.paypal.com/docs/api/orders/v2/#orders_patch
     pub async fn update_order<S: std::fmt::Display>(
-        &self,
+        &mut self,
         id: S,
         intent: Option<Intent>,
         purchase_units: Option<Vec<PurchaseUnit>>,
@@ -811,15 +813,17 @@ impl super::Client {
 
             for (i, unit) in p_units.iter().enumerate() {
                 let unit_str = serde_json::to_string(&unit)?;
-                let mut unit_json = format!(r#"
+                let mut unit_json = format!(
+                    r#"
                 {{
                     "op": "replace",
                     "path": "/purchase_units/@reference_id='{reference_id}'",
                     "value": {unit}
                 }}
                 "#,
-                reference_id = unit.reference_id.clone().unwrap_or_else(|| String::from("default")),
-                unit = unit_str);
+                    reference_id = unit.reference_id.clone().unwrap_or_else(|| String::from("default")),
+                    unit = unit_str
+                );
 
                 if i < p_units.len() - 1 {
                     unit_json += ",";
@@ -832,7 +836,7 @@ impl super::Client {
         if let Some(x) = intent {
             let intent_str = match x {
                 Intent::Authorize => String::from("AUTHORIZE"),
-                Intent::Capture => String::from("CAPTURE")
+                Intent::Capture => String::from("CAPTURE"),
             };
 
             intent_json = format!(
@@ -848,7 +852,7 @@ impl super::Client {
         }
 
         let final_json = {
-            if intent_json != "" && units_json != "" {
+            if !intent_json.is_empty() && !units_json.is_empty() {
                 format!("[{},{}]", intent_json, units_json)
             } else {
                 format!("[{}{}]", intent_json, units_json)
@@ -864,6 +868,7 @@ impl super::Client {
                     ..Default::default()
                 },
             )
+            .await
         };
 
         let res = builder.body(final_json.clone()).send().await?;
@@ -877,7 +882,7 @@ impl super::Client {
 
     /// Shows details for an order, by ID.
     pub async fn show_order_details<S: std::fmt::Display>(
-        &self,
+        &mut self,
         order_id: S,
     ) -> Result<Order, Box<dyn std::error::Error>> {
         self.build_endpoint_order(order_id, "", false, crate::HeaderParams::default())
@@ -888,7 +893,7 @@ impl super::Client {
     /// the buyer must first approve the order or a valid payment_source must be provided in the request.
     /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
     pub async fn capture_order<S: std::fmt::Display>(
-        &self,
+        &mut self,
         order_id: S,
         header_params: crate::HeaderParams,
     ) -> Result<Order, Box<dyn std::error::Error>> {
@@ -900,7 +905,7 @@ impl super::Client {
     /// the buyer must first approve the order or a valid payment_source must be provided in the request.
     /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
     pub async fn authorize_order<S: std::fmt::Display>(
-        &self,
+        &mut self,
         order_id: S,
         header_params: crate::HeaderParams,
     ) -> Result<Order, Box<dyn std::error::Error>> {

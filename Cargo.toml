@@ -1,6 +1,6 @@
 [package]
 name = "paypal-rs"
-version = "0.2.0-alpha.0"
+version = "0.2.0-alpha.1"
 authors = ["Edgar <git@edgarluque.com>"]
 description = "A library that wraps the paypal api asynchronously."
 repository = "https://github.com/edg-l/paypal-rs/"
@@ -14,12 +14,15 @@ edition = "2018"
 
 [dependencies]
 reqwest = { version = "0.10.10", features = ["json"] }
-tokio = { version = "0.3.6", features = ["full"] }
 serde = { version = "1.0.118", features = ["derive"] }
-serde_json = "1.0.60"
+serde_json = "1.0.61"
+chrono = { version = "0.4.19", features = ["serde"] }
 jsonwebtoken = "7.2.0"
 base64 = "0.13.0"
 log = "0.4.11"
+bytes = "~0.5.6"
+
+[dev-dependencies]
+# Can't update this until reqwest updates.
+tokio = { version = "0.2.24", features = ["macros", "rt-core"] }
 dotenv = "0.15.0"
-chrono = { version = "0.4.19", features = ["serde"] }
-bytes = "0.5"

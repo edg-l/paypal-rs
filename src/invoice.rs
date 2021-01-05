@@ -8,9 +8,9 @@
 
 use crate::common::*;
 use crate::errors;
+use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use bytes::Bytes;
 
 /// Paypal File reference
 #[derive(Debug, Serialize, Deserialize)]
@@ -688,16 +688,16 @@ pub struct CancelReason {
 /// QR pay action
 pub const QR_ACTION_PAY: &str = "pay";
 /// QR details action
-pub const QR_ACTION_DETAILS: &str ="details";
+pub const QR_ACTION_DETAILS: &str = "details";
 
 /// QR creation parameters
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct QRCodeParams {
-    /// The width, in pixels, of the QR code image. Value is from 150 to 500. 
+    /// The width, in pixels, of the QR code image. Value is from 150 to 500.
     pub width: i32,
-    /// The height, in pixels, of the QR code image. Value is from 150 to 500. 
+    /// The height, in pixels, of the QR code image. Value is from 150 to 500.
     pub height: i32,
-    /// The type of URL for which to generate a QR code. Valid values are pay and details. 
+    /// The type of URL for which to generate a QR code. Valid values are pay and details.
     ///
     /// Check QR_ACTION_PAY and QR_ACTION_DETAILS constants
     pub action: Option<String>,
@@ -725,14 +725,16 @@ impl super::Client {
     ///
     /// For example, the next invoice number after `INVOICE-1234` is `INVOICE-1235`.
     pub async fn generate_invoice_number(
-        &self,
+        &mut self,
         header_params: crate::HeaderParams,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/generate-next-invoice-number", self.endpoint()).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .post(format!("{}/v2/invoicing/generate-next-invoice-number", self.endpoint()).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.send().await?;
 
@@ -747,15 +749,17 @@ impl super::Client {
     /// Creates a draft invoice. To move the invoice from a draft to payable state, you must send the invoice.
     /// Include invoice details including merchant information. The invoice object must include an items array.
     pub async fn create_draft_invoice(
-        &self,
+        &mut self,
         invoice: InvoicePayload,
         header_params: crate::HeaderParams,
     ) -> Result<Invoice, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/invoices", self.endpoint()).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .post(format!("{}/v2/invoicing/invoices", self.endpoint()).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.json(&invoice).send().await?;
 
@@ -769,15 +773,17 @@ impl super::Client {
 
     /// Get an invoice by ID.
     pub async fn get_invoice<S: std::fmt::Display>(
-        &self,
+        &mut self,
         invoice_id: S,
         header_params: crate::HeaderParams,
     ) -> Result<Invoice, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .post(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.send().await?;
 
@@ -792,23 +798,25 @@ impl super::Client {
     /// List invoices
     /// Page size has the following limits: [1, 100].
     pub async fn list_invoices(
-        &self,
+        &mut self,
         page: i32,
         page_size: i32,
         header_params: crate::HeaderParams,
     ) -> Result<InvoiceList, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client.get(
-                format!(
-                    "{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true",
-                    self.endpoint(),
-                    page,
-                    page_size
-                )
-                .as_str(),
-            ),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client.get(
+                    format!(
+                        "{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true",
+                        self.endpoint(),
+                        page,
+                        page_size
+                    )
+                    .as_str(),
+                ),
+                header_params,
+            )
+            .await;
 
         let res = build.send().await?;
 
@@ -822,15 +830,17 @@ impl super::Client {
 
     /// Delete a invoice
     pub async fn delete_invoice<S: std::fmt::Display>(
-        &self,
+        &mut self,
         invoice_id: S,
         header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .delete(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .delete(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.send().await?;
 
@@ -843,25 +853,27 @@ impl super::Client {
 
     /// Update a invoice
     pub async fn update_invoice(
-        &self,
+        &mut self,
         invoice: Invoice,
         send_to_recipient: bool,
         send_to_invoicer: bool,
         header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client.put(
-                format!(
-                    "{}/v2/invoicing/invoices/{}?send_to_recipient={}&send_to_invoicer={}",
-                    self.endpoint(),
-                    invoice.id,
-                    send_to_recipient,
-                    send_to_invoicer
-                )
-                .as_str(),
-            ),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client.put(
+                    format!(
+                        "{}/v2/invoicing/invoices/{}?send_to_recipient={}&send_to_invoicer={}",
+                        self.endpoint(),
+                        invoice.id,
+                        send_to_recipient,
+                        send_to_invoicer
+                    )
+                    .as_str(),
+                ),
+                header_params,
+            )
+            .await;
 
         let res = build.send().await?;
 
@@ -874,16 +886,18 @@ impl super::Client {
 
     /// Cancel a invoice
     pub async fn cancel_invoice<S: std::fmt::Display>(
-        &self,
+        &mut self,
         invoice_id: S,
         reason: CancelReason,
         header_params: crate::HeaderParams,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/invoices/{}/cancel", self.endpoint(), invoice_id,).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .post(format!("{}/v2/invoicing/invoices/{}/cancel", self.endpoint(), invoice_id,).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.json(&reason).send().await?;
 
@@ -896,16 +910,24 @@ impl super::Client {
 
     /// Generate a QR code
     pub async fn generate_qr_code<S: std::fmt::Display>(
-        &self,
+        &mut self,
         invoice_id: S,
         params: QRCodeParams,
         header_params: crate::HeaderParams,
     ) -> Result<Bytes, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/invoices/{}/generate-qr-code", self.endpoint(), invoice_id).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client.post(
+                    format!(
+                        "{}/v2/invoicing/invoices/{}/generate-qr-code",
+                        self.endpoint(),
+                        invoice_id
+                    )
+                    .as_str(),
+                ),
+                header_params,
+            )
+            .await;
 
         let res = build.json(&params).send().await?;
 
@@ -919,16 +941,18 @@ impl super::Client {
 
     /// Records a payment for the invoice. If no payment is due, the invoice is marked as PAID. Otherwise, the invoice is marked as PARTIALLY PAID.
     pub async fn record_invoice_payment<S: std::fmt::Display>(
-        &self,
+        &mut self,
         invoice_id: S,
         payload: RecordPaymentPayload,
         header_params: crate::HeaderParams,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        let build = self.setup_headers(
-            self.client
-                .post(format!("{}/v2/invoicing/invoices/{}/payments", self.endpoint(), invoice_id).as_str()),
-            header_params,
-        );
+        let build = self
+            .setup_headers(
+                self.client
+                    .post(format!("{}/v2/invoicing/invoices/{}/payments", self.endpoint(), invoice_id).as_str()),
+                header_params,
+            )
+            .await;
 
         let res = build.json(&payload).send().await?;
 

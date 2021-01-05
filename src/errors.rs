@@ -1,9 +1,9 @@
 //! Errors created by this crate.
-use std::collections::HashMap;
-use std::fmt;
-use std::error::Error;
-use serde::{Deserialize, Serialize};
 use crate::common::LinkDescription;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
 
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]

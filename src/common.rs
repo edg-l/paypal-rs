@@ -1,4 +1,4 @@
-//! Common paypal object definitions used amon 2 or more APIs
+//! Common paypal object definitions used by 2 or more APIs
 
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;

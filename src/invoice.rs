@@ -7,7 +7,8 @@
 //! Reference: https://developer.paypal.com/docs/api/invoicing/v2/
 
 use crate::common::*;
-use crate::errors;
+use crate::HeaderParams;
+use crate::errors::{ResponseError, PaypalError};
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -727,7 +728,7 @@ impl super::Client {
     pub async fn generate_invoice_number(
         &mut self,
         header_params: crate::HeaderParams,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> Result<String, ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -736,13 +737,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await?;
+        let res = build.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let x = res.json::<HashMap<String, String>>().await?;
+            let x = res.json::<HashMap<String, String>>().await.map_err(ResponseError::HttpError)?;
             Ok(x.get("invoice_number").expect("to have a invoice number").clone())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
@@ -751,8 +752,8 @@ impl super::Client {
     pub async fn create_draft_invoice(
         &mut self,
         invoice: InvoicePayload,
-        header_params: crate::HeaderParams,
-    ) -> Result<Invoice, Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<Invoice, ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -761,22 +762,22 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&invoice).send().await?;
+        let res = build.json(&invoice).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let x = res.json::<Invoice>().await?;
+            let x = res.json::<Invoice>().await.map_err(ResponseError::HttpError)?;
             Ok(x)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Get an invoice by ID.
-    pub async fn get_invoice<S: std::fmt::Display>(
+    pub async fn get_invoice(
         &mut self,
-        invoice_id: S,
-        header_params: crate::HeaderParams,
-    ) -> Result<Invoice, Box<dyn std::error::Error>> {
+        invoice_id: &str,
+        header_params: HeaderParams,
+    ) -> Result<Invoice, ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -785,13 +786,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await?;
+        let res = build.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let x = res.json::<Invoice>().await?;
+            let x = res.json::<Invoice>().await.map_err(ResponseError::HttpError)?;
             Ok(x)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
@@ -801,8 +802,8 @@ impl super::Client {
         &mut self,
         page: i32,
         page_size: i32,
-        header_params: crate::HeaderParams,
-    ) -> Result<InvoiceList, Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<InvoiceList, ResponseError> {
         let build = self
             .setup_headers(
                 self.client.get(
@@ -818,22 +819,22 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await?;
+        let res = build.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let x = res.json::<InvoiceList>().await?;
+            let x = res.json::<InvoiceList>().await.map_err(ResponseError::HttpError)?;
             Ok(x)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Delete a invoice
-    pub async fn delete_invoice<S: std::fmt::Display>(
+    pub async fn delete_invoice(
         &mut self,
-        invoice_id: S,
-        header_params: crate::HeaderParams,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+        invoice_id: &str,
+        header_params: HeaderParams,
+    ) -> Result<(), ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -842,12 +843,12 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await?;
+        let res = build.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
@@ -857,8 +858,8 @@ impl super::Client {
         invoice: Invoice,
         send_to_recipient: bool,
         send_to_invoicer: bool,
-        header_params: crate::HeaderParams,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<(), ResponseError> {
         let build = self
             .setup_headers(
                 self.client.put(
@@ -875,22 +876,22 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await?;
+        let res = build.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Cancel a invoice
-    pub async fn cancel_invoice<S: std::fmt::Display>(
+    pub async fn cancel_invoice(
         &mut self,
-        invoice_id: S,
+        invoice_id: &str,
         reason: CancelReason,
-        header_params: crate::HeaderParams,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<(), ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -899,22 +900,22 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&reason).send().await?;
+        let res = build.json(&reason).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Generate a QR code
-    pub async fn generate_qr_code<S: std::fmt::Display>(
+    pub async fn generate_qr_code(
         &mut self,
-        invoice_id: S,
+        invoice_id: &str,
         params: QRCodeParams,
-        header_params: crate::HeaderParams,
-    ) -> Result<Bytes, Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<Bytes, ResponseError> {
         let build = self
             .setup_headers(
                 self.client.post(
@@ -929,23 +930,23 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&params).send().await?;
+        let res = build.json(&params).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let b = res.bytes().await?;
+            let b = res.bytes().await.map_err(ResponseError::HttpError)?;
             Ok(b)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Records a payment for the invoice. If no payment is due, the invoice is marked as PAID. Otherwise, the invoice is marked as PARTIALLY PAID.
-    pub async fn record_invoice_payment<S: std::fmt::Display>(
+    pub async fn record_invoice_payment(
         &mut self,
-        invoice_id: S,
+        invoice_id: &str,
         payload: RecordPaymentPayload,
         header_params: crate::HeaderParams,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> Result<String, ResponseError> {
         let build = self
             .setup_headers(
                 self.client
@@ -954,13 +955,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&payload).send().await?;
+        let res = build.json(&payload).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let x = res.json::<HashMap<String, String>>().await?;
+            let x = res.json::<HashMap<String, String>>().await.map_err(ResponseError::HttpError)?;
             Ok(x.get("payment_id").unwrap().to_owned())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 

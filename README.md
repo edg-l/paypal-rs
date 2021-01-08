@@ -1,7 +1,7 @@
 # paypal-rs
 [![Crates.io](https://meritbadge.herokuapp.com/paypal-rs)](https://crates.io/crates/paypal-rs)
 ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
-![Docs](https://docs.rs/paypal-rs/badge.svg)
+[![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 
 A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a stringly typed manner.
 
@@ -35,9 +35,7 @@ async fn main() {
 
     let order_payload = OrderPayload::new(
         Intent::Authorize,
-        vec![PurchaseUnit::new(Amount::new(
-            Currency::EUR, "10.0",
-        ))],
+        vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
     );
 
     let order = client

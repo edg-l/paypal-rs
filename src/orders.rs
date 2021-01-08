@@ -4,8 +4,9 @@
 //!
 //! Reference: https://developer.paypal.com/docs/api/orders/v2/
 
+use crate::HeaderParams;
 use crate::common::*;
-use crate::errors;
+use crate::errors::{ResponseError, PaypalError};
 use serde::{Deserialize, Serialize};
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
@@ -742,8 +743,8 @@ impl super::Client {
     pub async fn create_order(
         &mut self,
         order: OrderPayload,
-        header_params: crate::HeaderParams,
-    ) -> Result<Order, Box<dyn std::error::Error>> {
+        header_params: HeaderParams,
+    ) -> Result<Order, ResponseError> {
         let builder = {
             self.setup_headers(
                 self.client.post(&format!("{}/v2/checkout/orders", self.endpoint())),
@@ -751,24 +752,24 @@ impl super::Client {
             )
             .await
         };
-        let res = builder.json(&order).send().await?;
+        let res = builder.json(&order).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await?;
+            let order = res.json::<Order>().await.map_err(ResponseError::HttpError)?;
             Ok(order)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Used internally for order requests that have no body.
-    async fn build_endpoint_order<S: std::fmt::Display, A: std::fmt::Display>(
+    async fn build_endpoint_order(
         &mut self,
-        order_id: S,
-        endpoint: A,
+        order_id: &str,
+        endpoint: &str,
         post: bool,
         header_params: crate::HeaderParams,
-    ) -> Result<Order, Box<dyn std::error::Error>> {
+    ) -> Result<Order, ResponseError> {
         let format = format!("{}/v2/checkout/orders/{}/{}", self.endpoint(), order_id, endpoint);
 
         let builder = self
@@ -781,13 +782,13 @@ impl super::Client {
             )
             .await;
 
-        let res = builder.send().await?;
+        let res = builder.send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await?;
+            let order = res.json::<Order>().await.expect("error serializing json response");
             Ok(order)
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
@@ -799,12 +800,12 @@ impl super::Client {
     /// Note: You can only update the intent from Authorize to Capture
     ///
     /// More info on what you can change: https://developer.paypal.com/docs/api/orders/v2/#orders_patch
-    pub async fn update_order<S: std::fmt::Display>(
+    pub async fn update_order(
         &mut self,
-        id: S,
+        id: &str,
         intent: Option<Intent>,
         purchase_units: Option<Vec<PurchaseUnit>>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), ResponseError> {
         let mut intent_json = String::new();
         let units_json = String::new();
 
@@ -812,7 +813,7 @@ impl super::Client {
             let mut units_json = String::new();
 
             for (i, unit) in p_units.iter().enumerate() {
-                let unit_str = serde_json::to_string(&unit)?;
+                let unit_str = serde_json::to_string(&unit).expect("error deserializing PurchaseUnit json");
                 let mut unit_json = format!(
                     r#"
                 {{
@@ -871,32 +872,32 @@ impl super::Client {
             .await
         };
 
-        let res = builder.body(final_json.clone()).send().await?;
+        let res = builder.body(final_json.clone()).send().await.map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
         }
     }
 
     /// Shows details for an order, by ID.
-    pub async fn show_order_details<S: std::fmt::Display>(
+    pub async fn show_order_details(
         &mut self,
-        order_id: S,
-    ) -> Result<Order, Box<dyn std::error::Error>> {
-        self.build_endpoint_order(order_id, "", false, crate::HeaderParams::default())
+        order_id: &str,
+    ) -> Result<Order, ResponseError> {
+        self.build_endpoint_order(order_id, "", false, HeaderParams::default())
             .await
     }
 
     /// Captures payment for an order. To successfully capture payment for an order,
     /// the buyer must first approve the order or a valid payment_source must be provided in the request.
     /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
-    pub async fn capture_order<S: std::fmt::Display>(
+    pub async fn capture_order(
         &mut self,
-        order_id: S,
+        order_id: &str,
         header_params: crate::HeaderParams,
-    ) -> Result<Order, Box<dyn std::error::Error>> {
+    ) -> Result<Order, ResponseError> {
         self.build_endpoint_order(order_id, "capture", true, header_params)
             .await
     }
@@ -904,11 +905,11 @@ impl super::Client {
     /// Authorizes payment for an order. To successfully authorize payment for an order,
     /// the buyer must first approve the order or a valid payment_source must be provided in the request.
     /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
-    pub async fn authorize_order<S: std::fmt::Display>(
+    pub async fn authorize_order(
         &mut self,
-        order_id: S,
-        header_params: crate::HeaderParams,
-    ) -> Result<Order, Box<dyn std::error::Error>> {
+        order_id: &str,
+        header_params: HeaderParams,
+    ) -> Result<Order, ResponseError> {
         self.build_endpoint_order(order_id, "authorize", true, header_params)
             .await
     }

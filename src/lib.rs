@@ -1,14 +1,82 @@
-//! # paypal-rs
+//! [![Crates.io](https://meritbadge.herokuapp.com/paypal-rs)](https://crates.io/crates/paypal-rs)
 //! ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
-//! ![Docs](https://docs.rs/paypal-rs/badge.svg)
+//! [![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 //!
-//! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
+//! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a stringly typed manner.
 //!
 //! Crate: https://crates.io/crates/paypal-rs
 //!
 //! Documentation: https://docs.rs/paypal-rs
 //!
 //! Currently in early development.
+//!
+
+//! ## Example
+//! 
+//! ```rust
+//! use paypal_rs::{
+//!     Client,
+//!     HeaderParams,
+//!     Prefer,
+//!     orders::{OrderPayload, Intent, PurchaseUnit, Amount},
+//!     common::Currency,
+//! };
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//!     dotenv::dotenv::ok();
+//!     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
+//!     let secret = std::env::var("PAYPAL_SECRET").unwrap();
+//! 
+//!     let mut client = Client::new(clientid, secret, true);
+//! 
+//!     client.get_access_token().await.unwrap();
+//! 
+//!     let order_payload = OrderPayload::new(
+//!         Intent::Authorize,
+//!         vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
+//!     );
+//! 
+//!     let order = client
+//!         .create_order(
+//!             order_payload,
+//!             HeaderParams {
+//!                 prefer: Some(Prefer::Representation),
+//!                 ..Default::default()
+//!             },
+//!         )
+//!         .await
+//!         .unwrap();
+//! }
+//! ```
+//! 
+//! ## Testing
+//! You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
+//! 
+//! `cargo test`
+//! 
+//! ## Roadmap
+//! 
+//! - [x] Orders API - 0.1.0
+//! - - [x] Create order
+//! - - [x] Update order
+//! - - [x] Show order details
+//! - - [x] Authorize payment for order
+//! - - [x] Capture payment for order
+//! - [ ] Invoicing API - 0.2.0
+//! - [ ] Payments API - 0.3.0
+//! - [ ] Tracking API - 0.4.0
+//! - [ ] Subscriptions API - 0.5.0
+//! - [ ] Identity API - 0.6.0
+//! - [ ] Disputes API - 0.7.0
+//! - [ ] Catalog Products API - 0.8.0
+//! - [ ] Partner Referrals API - 0.9.0
+//! - [ ] Payouts API - 0.10.0
+//! - [ ] Transaction Search API - 0.11.0
+//! - [ ] Referenced Payouts API - 0.12.0
+//! - [ ] Vault API - 0.13.0
+//! - [ ] Webhooks Management API - 0.14.0
+//! - [ ] Payment Experience Web Profiles API - 1.0.0
 
 #![deny(missing_docs)]
 
@@ -17,6 +85,7 @@ pub mod errors;
 pub mod invoice;
 pub mod orders;
 
+use errors::{PaypalError, ResponseError};
 use reqwest::header;
 use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
@@ -271,7 +340,7 @@ impl Client {
     }
 
     /// Gets a access token used in all the api calls.
-    pub async fn get_access_token(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn get_access_token(&mut self) -> Result<(), ResponseError> {
         if !self.access_token_expired() {
             return Ok(());
         }
@@ -283,15 +352,18 @@ impl Client {
             .header("Accept", "application/json")
             .body("grant_type=client_credentials")
             .send()
-            .await?;
+            .await
+            .map_err(ResponseError::HttpError)?;
 
         if res.status().is_success() {
-            let token = res.json::<AccessToken>().await?;
+            let token = res.json::<AccessToken>().await.map_err(ResponseError::HttpError)?;
             self.auth.expires = Some((Instant::now(), Duration::new(token.expires_in, 0)));
             self.auth.access_token = Some(token);
             Ok(())
         } else {
-            Err(Box::new(res.json::<errors::ApiResponseError>().await?))
+            Err(ResponseError::ApiError(
+                res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?,
+            ))
         }
     }
 
@@ -307,10 +379,10 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use crate::{orders::*, Client, HeaderParams, Prefer};
     use crate::common::Currency;
-    use std::str::FromStr;
+    use crate::{orders::*, Client, HeaderParams, Prefer};
     use std::env;
+    use std::str::FromStr;
 
     async fn create_client() -> Client {
         dotenv::dotenv().ok();
@@ -326,7 +398,10 @@ mod tests {
     async fn test_order() {
         let mut client = create_client().await;
 
-        let order = OrderPayload::new(Intent::Authorize, vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))]);
+        let order = OrderPayload::new(
+            Intent::Authorize,
+            vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
+        );
 
         let ref_id = format!(
             "TEST-{:?}",
@@ -354,7 +429,7 @@ mod tests {
 
         client
             .update_order(
-                order_created.id,
+                &order_created.id,
                 Some(Intent::Capture),
                 Some(order_created.purchase_units.expect("to exist")),
             )

@@ -5,9 +5,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 
+
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ApiResponseError {
+pub struct PaypalError {
     /// The error name.
     pub name: String,
     /// The error message.
@@ -24,13 +25,22 @@ pub struct ApiResponseError {
     pub links: Vec<LinkDescription>,
 }
 
-impl fmt::Display for ApiResponseError {
+impl fmt::Display for PaypalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:#?}", self)
     }
 }
 
-impl Error for ApiResponseError {}
+impl Error for PaypalError {}
+
+/// A response error, it may be paypal related or an error related to the http request itself.
+#[derive(Debug)]
+pub enum ResponseError {
+    /// A paypal api error.
+    ApiError(PaypalError),
+    /// A http error.
+    HttpError(reqwest::Error)
+}
 
 /// When a currency is invalid.
 #[derive(Debug)]

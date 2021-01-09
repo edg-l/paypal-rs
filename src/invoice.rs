@@ -737,13 +737,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await.map_err(ResponseError::HttpError)?;
+        let res = build.send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<HashMap<String, String>>().await.map_err(ResponseError::HttpError)?;
+            let x = res.json::<HashMap<String, String>>().await?;
             Ok(x.get("invoice_number").expect("to have a invoice number").clone())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -762,13 +762,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&invoice).send().await.map_err(ResponseError::HttpError)?;
+        let res = build.json(&invoice).send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<Invoice>().await.map_err(ResponseError::HttpError)?;
+            let x = res.json::<Invoice>().await?;
             Ok(x)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -786,13 +786,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await.map_err(ResponseError::HttpError)?;
+        let res = build.send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<Invoice>().await.map_err(ResponseError::HttpError)?;
+            let x = res.json::<Invoice>().await?;
             Ok(x)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -819,13 +819,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await.map_err(ResponseError::HttpError)?;
+        let res = build.send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<InvoiceList>().await.map_err(ResponseError::HttpError)?;
+            let x = res.json::<InvoiceList>().await?;
             Ok(x)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -843,12 +843,12 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await.map_err(ResponseError::HttpError)?;
+        let res = build.send().await?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -876,12 +876,12 @@ impl super::Client {
             )
             .await;
 
-        let res = build.send().await.map_err(ResponseError::HttpError)?;
+        let res = build.send().await?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -900,12 +900,12 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&reason).send().await.map_err(ResponseError::HttpError)?;
+        let res = build.json(&reason).send().await?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -930,13 +930,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&params).send().await.map_err(ResponseError::HttpError)?;
+        let res = build.json(&params).send().await?;
 
         if res.status().is_success() {
-            let b = res.bytes().await.map_err(ResponseError::HttpError)?;
+            let b = res.bytes().await?;
             Ok(b)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 
@@ -955,13 +955,13 @@ impl super::Client {
             )
             .await;
 
-        let res = build.json(&payload).send().await.map_err(ResponseError::HttpError)?;
+        let res = build.json(&payload).send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<HashMap<String, String>>().await.map_err(ResponseError::HttpError)?;
+            let x = res.json::<HashMap<String, String>>().await?;
             Ok(x.get("payment_id").unwrap().to_owned())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(res.json::<PaypalError>().await?.into())
         }
     }
 

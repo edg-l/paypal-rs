@@ -752,13 +752,13 @@ impl super::Client {
             )
             .await
         };
-        let res = builder.json(&order).send().await.map_err(ResponseError::HttpError)?;
+        let res = builder.json(&order).send().await?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await.map_err(ResponseError::HttpError)?;
+            let order = res.json::<Order>().await?;
             Ok(order)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
         }
     }
 
@@ -782,13 +782,13 @@ impl super::Client {
             )
             .await;
 
-        let res = builder.send().await.map_err(ResponseError::HttpError)?;
+        let res = builder.send().await?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await.expect("error serializing json response");
+            let order = res.json::<Order>().await?;
             Ok(order)
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
         }
     }
 
@@ -813,7 +813,7 @@ impl super::Client {
             let mut units_json = String::new();
 
             for (i, unit) in p_units.iter().enumerate() {
-                let unit_str = serde_json::to_string(&unit).expect("error deserializing PurchaseUnit json");
+                let unit_str = serde_json::to_string(&unit).expect("error serializing purchase unit");
                 let mut unit_json = format!(
                     r#"
                 {{
@@ -872,12 +872,12 @@ impl super::Client {
             .await
         };
 
-        let res = builder.body(final_json.clone()).send().await.map_err(ResponseError::HttpError)?;
+        let res = builder.body(final_json.clone()).send().await?;
 
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?))
+            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
         }
     }
 

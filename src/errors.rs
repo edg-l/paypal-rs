@@ -42,6 +42,38 @@ pub enum ResponseError {
     HttpError(reqwest::Error)
 }
 
+impl fmt::Display for ResponseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ResponseError::ApiError(e) => write!(f, "{}", e),
+            ResponseError::HttpError(e) => write!(f, "{}", e),
+        }
+    }
+}
+
+impl Error for ResponseError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            ResponseError::ApiError(e) => Some(e),
+            ResponseError::HttpError(e) => Some(e),
+        }
+    }
+}
+
+// Implemented so we can use ? directly on it.
+impl From<PaypalError> for ResponseError {
+    fn from(e: PaypalError) -> Self {
+        ResponseError::ApiError(e)
+    }
+}
+
+// Implemented so we can use ? directly on it.
+impl From<reqwest::Error> for ResponseError {
+    fn from(e: reqwest::Error) -> Self {
+        ResponseError::HttpError(e)
+    }
+}
+
 /// When a currency is invalid.
 #[derive(Debug)]
 pub struct InvalidCurrencyError(pub String);

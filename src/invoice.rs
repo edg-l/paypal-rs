@@ -178,7 +178,7 @@ pub struct Name {
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct PhoneDetail {
     /// The country calling code (CC), in its canonical international E.164 numbering plan format.
-    pub country_code: Country,
+    pub country_code: String,
     /// The national number, in its canonical international E.164 numbering plan format.
     pub national_number: String,
     /// The extension number.

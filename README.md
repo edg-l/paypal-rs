@@ -13,6 +13,8 @@ Currently in early development.
 
 Note: This README shows how to use the prerelease version, to view the README for `0.1.0` go [here](https://github.com/edg-l/paypal-rs/tree/0.1.0).
 
+Some code in this repository is generated using https://github.com/edg-l/payhelper
+
 ## Example
 
 ```rust

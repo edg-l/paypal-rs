@@ -85,3 +85,15 @@ impl fmt::Display for InvalidCurrencyError {
 }
 
 impl Error for InvalidCurrencyError {}
+
+/// When a country is invalid.
+#[derive(Debug)]
+pub struct InvalidCountryError(pub String);
+
+impl fmt::Display for InvalidCountryError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+       write!(f, "{:?} is not a valid country", self.0) 
+    }
+}
+
+impl Error for InvalidCountryError {}

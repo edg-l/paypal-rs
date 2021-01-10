@@ -84,6 +84,7 @@ pub mod common;
 pub mod errors;
 pub mod invoice;
 pub mod orders;
+pub mod countries;
 
 use errors::{PaypalError, ResponseError};
 use reqwest::header;
@@ -380,6 +381,7 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use crate::common::Currency;
+    use crate::countries::Country;
     use crate::{orders::*, Client, HeaderParams, Prefer};
     use std::env;
     use std::str::FromStr;
@@ -442,5 +444,12 @@ mod tests {
         assert_eq!(Currency::EUR.to_string(), "EUR");
         assert_eq!(Currency::JPY.to_string(), "JPY");
         assert_eq!(Currency::JPY, Currency::from_str("JPY").unwrap());
+    }
+
+    #[test]
+    fn test_country() {
+        assert_eq!(Country::US.to_string(), "US");
+        assert_eq!(Country::ES.to_string(), "ES");
+        assert_eq!(Country::ES, Country::from_str("ES").unwrap());
     }
 }

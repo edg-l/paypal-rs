@@ -7,6 +7,7 @@
 //! Reference: https://developer.paypal.com/docs/api/invoicing/v2/
 
 use crate::common::*;
+use crate::countries::Country;
 use crate::HeaderParams;
 use crate::errors::{ResponseError, PaypalError};
 use bytes::Bytes;
@@ -177,7 +178,7 @@ pub struct Name {
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct PhoneDetail {
     /// The country calling code (CC), in its canonical international E.164 numbering plan format.
-    pub country_code: String,
+    pub country_code: Country,
     /// The national number, in its canonical international E.164 numbering plan format.
     pub national_number: String,
     /// The extension number.

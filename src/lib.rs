@@ -40,10 +40,7 @@
 //!     let order = client
 //!         .create_order(
 //!             order_payload,
-//!             HeaderParams {
-//!                 prefer: Some(Prefer::Representation),
-//!                 ..Default::default()
-//!             },
+//!             HeaderParams::default(),
 //!         )
 //!         .await
 //!         .unwrap();
@@ -192,7 +189,7 @@ pub enum Prefer {
 
 impl Default for Prefer {
     fn default() -> Self {
-        Prefer::Minimal
+        Prefer::Representation
     }
 }
 
@@ -214,7 +211,7 @@ pub struct HeaderParams {
     /// You can retry calls that fail with network timeouts or the HTTP 500 status code. You can retry calls for as long as the server stores the ID.
     pub request_id: Option<String>,
     /// The preferred server response upon successful completion of the request.
-    pub prefer: Option<Prefer>,
+    pub prefer: Prefer,
     /// The media type. Required for operations with a request body.
     pub content_type: Option<String>,
 }
@@ -318,12 +315,10 @@ impl Client {
             headers.append("PayPal-Request-Id", request_id.parse().unwrap());
         }
 
-        if let Some(prefer) = header_params.prefer {
-            match prefer {
-                Prefer::Minimal => headers.append("Prefer", "return=minimal".parse().unwrap()),
-                Prefer::Representation => headers.append("Prefer", "return=representation".parse().unwrap()),
-            };
-        }
+        match header_params.prefer {
+            Prefer::Minimal => headers.append("Prefer", "return=minimal".parse().unwrap()),
+            Prefer::Representation => headers.append("Prefer", "return=representation".parse().unwrap()),
+        };
 
         if let Some(content_type) = header_params.content_type {
             headers.append(header::CONTENT_TYPE, content_type.parse().unwrap());
@@ -409,7 +404,6 @@ mod tests {
             .create_order(
                 order,
                 HeaderParams {
-                    prefer: Some(Prefer::Representation),
                     request_id: Some(ref_id.clone()),
                     ..Default::default()
                 },

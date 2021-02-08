@@ -10,6 +10,7 @@ use crate::common::*;
 use crate::errors::{PaypalError, ResponseError};
 use crate::HeaderParams;
 use bytes::Bytes;
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use std::collections::HashMap;
@@ -59,7 +60,7 @@ pub struct PaymentTerm {
     /// The payment term. Payment can be due upon receipt, a specified date, or in a set number of days
     pub term_type: PaymentTermType,
     /// The date when the invoice payment is due,
-    pub due_date: Option<chrono::DateTime<chrono::Utc>>,
+    pub due_date: Option<chrono::NaiveDate>,
 }
 
 /// Flow type
@@ -124,9 +125,9 @@ pub struct InvoiceDetail {
     /// The invoice number. Default is the number that is auto-incremented number from the last number.
     pub invoice_number: String,
     /// The invoice date as specificed by the sender
-    pub invoice_date: chrono::DateTime<chrono::Utc>,
+    pub invoice_date: chrono::NaiveDate,
     /// The payment due date for the invoice.
-    pub payment_term: PaymentTerm,
+    pub payment_term: Option<PaymentTerm>,
     /// The audit metadata
     pub metadata: Metadata,
 }
@@ -556,9 +557,9 @@ pub struct Invoice {
     /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,
     /// The invoicer information. Includes the business name, email, address, phone, fax, tax ID, additional notes, and logo URL.
-    pub invoicer: InvoicerInfo,
+    pub invoicer: Option<InvoicerInfo>,
     /// The billing and shipping information. Includes name, email, address, phone and language.
-    pub primary_recipients: Vec<RecipientInfo>,
+    pub primary_recipients: Option<Vec<RecipientInfo>>,
     /// An array of one or more CC: emails to which notifications are sent.
     /// If you omit this parameter, a notification is sent to all CC: email addresses that are part of the invoice.
     pub additional_recipients: Option<Vec<String>>,
@@ -886,4 +887,28 @@ impl super::Client {
     }
 
     // TODO: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_payments-delete
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{invoice::*, Client, HeaderParams};
+
+    async fn create_client() -> Client {
+        dotenv::dotenv().ok();
+        let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
+        let secret = std::env::var("PAYPAL_SECRET").unwrap();
+
+        let client = Client::new(clientid, secret, true);
+
+        client
+    }
+
+    #[tokio::test]
+    async fn test_invoice() {
+        let mut client = create_client().await;
+
+        let list = client.list_invoices(1, 10, HeaderParams::default()).await.unwrap();
+
+        println!("{:?}", list);
+    }
 }

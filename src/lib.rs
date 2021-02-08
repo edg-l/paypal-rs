@@ -12,7 +12,7 @@
 //!
 
 //! ## Example
-//! 
+//!
 //! ```rust
 //! use paypal_rs::{
 //!     Client,
@@ -21,22 +21,22 @@
 //!     orders::{OrderPayload, Intent, PurchaseUnit, Amount},
 //!     common::Currency,
 //! };
-//! 
+//!
 //! #[tokio::main]
 //! async fn main() {
 //!     dotenv::dotenv().ok();
 //!     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
 //!     let secret = std::env::var("PAYPAL_SECRET").unwrap();
-//! 
+//!
 //!     let mut client = Client::new(clientid, secret, true);
-//! 
+//!
 //!     client.get_access_token().await.unwrap();
-//! 
+//!
 //!     let order_payload = OrderPayload::new(
 //!         Intent::Authorize,
 //!         vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
 //!     );
-//! 
+//!
 //!     let order = client
 //!         .create_order(
 //!             order_payload,
@@ -49,14 +49,14 @@
 //!         .unwrap();
 //! }
 //! ```
-//! 
+//!
 //! ## Testing
 //! You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
-//! 
+//!
 //! `cargo test`
-//! 
+//!
 //! ## Roadmap
-//! 
+//!
 //! - [x] Orders API - 0.1.0
 //! - - [x] Create order
 //! - - [x] Update order
@@ -81,15 +81,16 @@
 #![deny(missing_docs)]
 
 pub mod common;
+pub mod countries;
 pub mod errors;
 pub mod invoice;
 pub mod orders;
-pub mod countries;
 
 use errors::{PaypalError, ResponseError};
 use reqwest::header;
 use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use std::time::{Duration, Instant};
 
 /// The paypal api endpoint used on a live application.
@@ -149,41 +150,32 @@ pub struct Client {
 /// use paypal_rs::Query;
 /// let query = Query { count: Some(40), ..Default::default() };
 /// ```
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize)]
 pub struct Query {
     /// The number of items to list in the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
     /// The end date and time for the range to show in the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub end_time: Option<chrono::DateTime<chrono::Utc>>,
     /// The page number indicating which set of items will be returned in the response.
     /// So, the combination of page=1 and page_size=20 returns the first 20 items.
     /// The combination of page=2 and page_size=20 returns items 21 through 40.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<i32>,
     /// The number of items to return in the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_size: Option<i32>,
     /// Indicates whether to show the total count in the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub total_count_required: Option<bool>,
     /// Sorts the payments in the response by a specified value, such as the create time or update time.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sort_by: Option<String>,
     /// Sorts the items in the response in ascending or descending order.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sort_order: Option<String>,
     /// The ID of the starting resource in the response.
     /// When results are paged, you can use the next_id value as the start_id to continue with the next set of results.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub start_id: Option<String>,
     /// The start index of the payments to list. Typically, you use the start_index to jump to a specific position in the resource history based on its cart.
     /// For example, to start at the second item in a list of results, specify start_index=2.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub start_index: Option<i32>,
     /// The start date and time for the range to show in the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub start_time: Option<chrono::DateTime<chrono::Utc>>,
     // TODO: Use https://github.com/samscott89/serde_qs
 }

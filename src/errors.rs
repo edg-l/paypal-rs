@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 
-
 /// A paypal api response error.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaypalError {
@@ -39,7 +38,7 @@ pub enum ResponseError {
     /// A paypal api error.
     ApiError(PaypalError),
     /// A http error.
-    HttpError(reqwest::Error)
+    HttpError(reqwest::Error),
 }
 
 impl fmt::Display for ResponseError {
@@ -80,7 +79,7 @@ pub struct InvalidCurrencyError(pub String);
 
 impl fmt::Display for InvalidCurrencyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       write!(f, "{:?} is not a valid currency", self.0) 
+        write!(f, "{:?} is not a valid currency", self.0)
     }
 }
 
@@ -92,7 +91,7 @@ pub struct InvalidCountryError(pub String);
 
 impl fmt::Display for InvalidCountryError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       write!(f, "{:?} is not a valid country", self.0) 
+        write!(f, "{:?} is not a valid country", self.0)
     }
 }
 

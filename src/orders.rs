@@ -4,10 +4,11 @@
 //!
 //! Reference: https://developer.paypal.com/docs/api/orders/v2/
 
-use crate::HeaderParams;
 use crate::common::*;
-use crate::errors::{ResponseError, PaypalError};
+use crate::errors::{PaypalError, ResponseError};
+use crate::HeaderParams;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -52,10 +53,10 @@ pub struct PhoneNumber {
 
 /// The phone number of the customer. Available only when you enable the
 /// Contact Telephone Number option in the Profile & Settings for the merchant's PayPal account.
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Phone {
     /// The phone type.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_type: Option<PhoneType>,
     /// The phone number
     pub phone_number: PhoneNumber,
@@ -85,60 +86,49 @@ pub struct TaxInfo {
 /// The customer who approves and pays for the order. The customer is also known as the payer.
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-payer
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Payer {
     /// The name of the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<PayerName>,
     /// The email address of the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub email_address: Option<String>,
     /// The PayPal-assigned ID for the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payer_id: Option<String>,
     /// The phone number of the customer. Available only when you enable the Contact
     /// Telephone Number option in the Profile & Settings for the merchant's PayPal account.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone: Option<Phone>,
     /// The birth date of the payer in YYYY-MM-DD format.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub birth_date: Option<String>,
     /// The tax information of the payer. Required only for Brazilian payer's.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_info: Option<TaxInfo>,
     /// The address of the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<Address>,
 }
 
 /// Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Breakdown {
     /// The subtotal for all items. Required if the request includes purchase_units[].items[].unit_amount.
     /// Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub item_total: Option<Money>,
     /// The shipping fee for all items within a given purchase_unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping: Option<Money>,
     /// The handling fee for all items within a given purchase_unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub handling: Option<Money>,
     /// The total tax for all items. Required if the request includes purchase_units.items.tax. Must equal the sum of (items[].tax * items[].quantity) for all items.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_total: Option<Money>,
     /// The insurance fee for all items within a given purchase_unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub insurance: Option<Money>,
     /// The shipping discount for all items within a given purchase_unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping_discount: Option<Money>,
     /// The discount for all items within a given purchase_unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub discount: Option<Money>,
 }
 
 /// Represents an amount of money.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
@@ -150,7 +140,6 @@ pub struct Amount {
     /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
     pub value: String,
     /// The breakdown of the amount.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub breakdown: Option<Breakdown>,
 }
 
@@ -166,22 +155,22 @@ impl Amount {
 }
 
 /// The merchant who receives payment for this transaction.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Payee {
     /// The email address of merchant.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub email_address: Option<String>,
     /// The encrypted PayPal account ID of the merchant.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub merchant_id: Option<String>,
 }
 
 /// Fees, commissions, tips, or donations
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PlatformFee {
     /// The fee for this transaction.
     pub amount: Money,
-    #[serde(skip_serializing_if = "Option::is_none")]
+
     /// The merchant who receives payment for this transaction.
     pub payee: Option<Payee>,
 }
@@ -204,13 +193,12 @@ impl Default for DisbursementMode {
 }
 
 /// Any additional payment instructions for PayPal Commerce Platform customers.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub platform_fees: Option<Vec<PlatformFee>>,
     /// The funds that are held on behalf of the merchant.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub disbursement_mode: Option<DisbursementMode>,
 }
 
@@ -233,17 +221,17 @@ impl Default for ItemCategoryType {
 }
 
 /// The name and address of the person to whom to ship the items.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ShippingDetail {
     /// The name of the person to whom to ship the items. Supports only the full_name property.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// The address of the person to whom to ship the items.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<Address>,
 }
 
 /// Represents an item.
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Item {
     /// The item name or title.
@@ -252,18 +240,14 @@ pub struct Item {
     /// If you specify unit_amount, purchase_units[].amount.breakdown.item_total is required. Must equal unit_amount * quantity for all items.
     pub unit_amount: Money,
     /// The item tax for each unit. If tax is specified, purchase_units[].amount.breakdown.tax_total is required. Must equal tax * quantity for all items.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tax: Option<Money>,
     /// The item quantity. Must be a whole number.
     pub quantity: String,
     /// The detailed item description.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// The stock keeping unit (SKU) for the item.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sku: Option<String>,
     /// The item category type
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub category: Option<ItemCategoryType>,
 }
 
@@ -404,11 +388,11 @@ pub struct PaymentCollection {
 }
 
 /// Represents either a full or partial order that the payer intends to purchase from the payee.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PurchaseUnit {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
     /// If you omit this value and the order contains only one purchase unit, PayPal sets this value to default.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reference_id: Option<String>,
     /// The total order amount with an optional breakdown that provides details, such as the total item amount,
     /// total tax amount, shipping, handling, insurance, and discounts, if any.
@@ -419,43 +403,33 @@ pub struct PurchaseUnit {
     /// see the PayPal REST APIs [Currency Codes](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/).
     pub amount: Amount,
     /// The merchant who receives payment for this transaction.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payee: Option<Payee>,
     /// Any additional payment instructions for PayPal Commerce Platform customers.
     /// Enables features for the PayPal Commerce Platform, such as delayed disbursement and collection of a platform fee.
     /// Applies during order creation for captured payments or during capture of authorized payments.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_instruction: Option<PaymentInstruction>,
     /// The purchase description.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// The API caller-provided external ID. Used to reconcile client transactions with PayPal transactions.
     /// Appears in transaction and settlement reports but is not visible to the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_id: Option<String>,
     /// The API caller-provided external invoice number for this order.
     /// Appears in both the payer's transaction history and the emails that the payer receives.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub invoice_id: Option<String>,
     /// The PayPal-generated ID for the purchase unit.
     /// This ID appears in both the payer's transaction history and the emails that the payer receives.
     /// In addition, this ID is available in transaction and settlement reports that merchants and API callers can use to reconcile transactions.
     /// This ID is only available when an order is saved by calling v2/checkout/orders/id/save.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// The soft descriptor is the dynamic text used to construct the statement descriptor that appears on a payer's card statement.
     ///
     /// More info here: https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit_request
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub soft_descriptor: Option<String>,
     /// An array of items that the customer purchases from the merchant.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub items: Option<Vec<Item>>,
     /// The name and address of the person to whom to ship the items.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping: Option<ShippingDetail>,
     /// The comprehensive history of payments for the purchase unit.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payments: Option<PaymentCollection>,
 }
 
@@ -547,60 +521,51 @@ impl Default for PayeePreferred {
 }
 
 /// A payment method.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PaymentMethod {
     /// The customer-selected payment method on the merchant site.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payer_selected: Option<String>,
     /// The merchant-preferred payment sources.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payee_preferred: Option<PayeePreferred>,
 }
 
 /// Customize the payer experience during the approval process for the payment with PayPal.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub brand_name: Option<String>,
     /// The BCP 47-formatted locale of pages that the PayPal payment experience shows. PayPal supports a five-character code.
     ///
     /// For example, da-DK, he-IL, id-ID, ja-JP, no-NO, pt-BR, ru-RU, sv-SE, th-TH, zh-CN, zh-HK, or zh-TW.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
     /// The type of landing page to show on the PayPal site for customer checkout
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub landing_page: Option<LandingPage>,
     /// The shipping preference
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping_preference: Option<ShippingPreference>,
     /// Configures a Continue or Pay Now checkout flow.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_action: Option<UserAction>,
     /// The customer and merchant payment preferences.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_method: Option<PaymentMethod>,
     /// The URL where the customer is redirected after the customer approves the payment.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub return_url: Option<String>,
     /// The URL where the customer is redirected after the customer cancels the payment.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancel_url: Option<String>,
 }
 
 /// A order payload to be used when creating an order.
+#[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
     pub intent: Intent,
     /// The customer who approves and pays for the order. The customer is also known as the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a payer and the payee.
     /// Each purchase unit represents either a full or partial order that the payer intends to purchase from the payee.
     pub purchase_units: Vec<PurchaseUnit>,
     /// Customize the payer experience during the approval process for the payment with PayPal.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub application_context: Option<ApplicationContext>,
 }
 
@@ -709,28 +674,23 @@ pub enum OrderStatus {
 }
 
 /// An order represents a payment between two or more parties.
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Order {
     /// The date and time when the transaction occurred.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub create_time: Option<chrono::DateTime<chrono::Utc>>,
     /// The date and time when the transaction was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub update_time: Option<chrono::DateTime<chrono::Utc>>,
     /// The ID of the order.
     pub id: String,
     /// The payment source used to fund the payment.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_source: Option<PaymentSourceResponse>,
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub intent: Option<Intent>,
     /// The customer who approves and pays for the order. The customer is also known as the payer.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a customer and merchant.
     /// Each purchase unit represents either a full or partial order that the customer intends to purchase from the merchant.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub purchase_units: Option<Vec<PurchaseUnit>>,
     /// The order status.
     pub status: OrderStatus,
@@ -882,10 +842,7 @@ impl super::Client {
     }
 
     /// Shows details for an order, by ID.
-    pub async fn show_order_details(
-        &mut self,
-        order_id: &str,
-    ) -> Result<Order, ResponseError> {
+    pub async fn show_order_details(&mut self, order_id: &str) -> Result<Order, ResponseError> {
         self.build_endpoint_order(order_id, "", false, HeaderParams::default())
             .await
     }

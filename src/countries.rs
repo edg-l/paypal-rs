@@ -1,8 +1,8 @@
 //! Generated using https://github.com/edg-l/payhelper
 
+use crate::errors::InvalidCountryError;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use crate::errors::InvalidCountryError;
 
 /// IS0-3166-1 country codes
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -629,7 +629,7 @@ impl FromStr for Country {
             "YE" => Ok(Self::YE),
             "ZM" => Ok(Self::ZM),
             "ZW" => Ok(Self::ZW),
-            country => Err(InvalidCountryError(country.to_owned()))
+            country => Err(InvalidCountryError(country.to_owned())),
         }
     }
 }

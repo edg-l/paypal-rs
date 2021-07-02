@@ -1,5 +1,7 @@
 # paypal-rs
-[![Crates.io](https://meritbadge.herokuapp.com/paypal-rs)](https://crates.io/crates/paypal-rs)
+[![Version](https://img.shields.io/crates/v/paypal-rs)](https://crates.io/crates/paypal-rs)
+[![Downloads](https://img.shields.io/crates/d/paypal-rs)](https://crates.io/crates/paypal-rs)
+[![License](https://img.shields.io/crates/l/paypal-rs)](https://crates.io/crates/paypal-rs)
 ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
 [![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 

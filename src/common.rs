@@ -61,7 +61,7 @@ pub struct Address {
 }
 
 /// Represents money
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,
@@ -73,7 +73,7 @@ pub struct Money {
     pub value: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(missing_docs)]
 pub enum LinkMethod {
@@ -89,7 +89,7 @@ pub enum LinkMethod {
 
 /// A HTOAES link
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct LinkDescription {
     /// The complete target URL.
     pub href: String,
@@ -100,7 +100,7 @@ pub struct LinkDescription {
 }
 
 /// ISO-4217 currency codes.
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum Currency {
     /// Australian dollar
     AUD,

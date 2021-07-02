@@ -108,7 +108,7 @@ pub struct Metadata {
 
 /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct InvoiceDetail {
     /// The reference data. Includes a post office (PO) number.
     pub reference: Option<String>,
@@ -521,7 +521,7 @@ pub enum Status {
 
 /// An invoice payload
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct InvoicePayload {
     /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,

@@ -339,12 +339,13 @@ pub enum CaptureStatusDetails {
 }
 
 /// A captured payment.
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Capture {
     /// The status of the captured payment.
     pub status: CaptureStatus,
     /// The details of the captured payment status.
-    pub status_details: CaptureStatusDetails,
+    pub status_details: Option<CaptureStatusDetails>,
 }
 
 /// The status of the refund
@@ -380,10 +381,13 @@ pub struct Refund {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentCollection {
     /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
+    #[serde(default)]
     pub authorizations: Vec<AuthorizationWithData>,
     /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments.
+    #[serde(default)]
     pub captures: Vec<Capture>,
     /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds.
+    #[serde(default)]
     pub refunds: Vec<Refund>,
 }
 

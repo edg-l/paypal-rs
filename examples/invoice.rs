@@ -1,4 +1,4 @@
-use paypal_rs::{common::*, errors::*, invoice::*, Client, HeaderParams, Prefer};
+use paypal_rs::{common::*, errors::*, invoice::*, Client, HeaderParams};
 
 #[tokio::main]
 async fn main() -> Result<(), ResponseError> {

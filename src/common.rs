@@ -94,7 +94,7 @@ pub struct LinkDescription {
     /// The complete target URL.
     pub href: String,
     /// The link relation type, which serves as an ID for a link that unambiguously describes the semantics of the link.
-    pub rel: String,
+    pub rel: Option<String>,
     /// The HTTP method required to make the related call.
     pub method: Option<LinkMethod>,
 }

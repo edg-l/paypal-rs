@@ -113,7 +113,7 @@ pub struct InvoiceDetail {
     /// The reference data. Includes a post office (PO) number.
     pub reference: Option<String>,
     /// The three-character ISO-4217 currency code that identifies the currency.
-    pub currency_code: String,
+    pub currency_code: Currency,
     /// A note to the invoice recipient. Also appears on the invoice notification email.
     pub note: Option<String>,
     /// The general terms of the invoice. Can include return or cancellation policy and other terms and conditions.
@@ -123,13 +123,13 @@ pub struct InvoiceDetail {
     /// An array of PayPal IDs for the files that are attached to an invoice.
     pub attachments: Option<Vec<FileReference>>,
     /// The invoice number. Default is the number that is auto-incremented number from the last number.
-    pub invoice_number: String,
+    pub invoice_number: Option<String>,
     /// The invoice date as specificed by the sender
-    pub invoice_date: chrono::NaiveDate,
+    pub invoice_date: Option<chrono::DateTime<chrono::Utc>>,
     /// The payment due date for the invoice.
     pub payment_term: Option<PaymentTerm>,
     /// The audit metadata
-    pub metadata: Metadata,
+    pub metadata: Option<Metadata>,
 }
 
 /// A name to be used as recipient, etc.
@@ -258,7 +258,7 @@ pub struct Discount {
 /// The unit of measure for the invoiced item.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum UnitOffMeasure {
+pub enum UnitOfMeasure {
     /// The unit of measure is quantity. This invoice template is typically used for physical goods.
     Quantity,
     /// The unit of measure is hours. This invoice template is typically used for services.
@@ -289,7 +289,7 @@ pub struct Item {
     /// Discount as a percent or amount at invoice level. The invoice discount amount is subtracted from the item total.
     pub discount: Option<Discount>,
     /// The unit of measure for the invoiced item. For AMOUNT the unit_amount and quantity are not shown on the invoice.
-    pub unit_of_measure: Option<UnitOffMeasure>,
+    pub unit_of_measure: Option<UnitOfMeasure>,
 }
 
 /// The partial payment details.
@@ -369,7 +369,7 @@ pub struct Breakdown {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-    pub currency_code: String,
+    pub currency_code: Currency,
     /// The value, which might be:
     /// - An integer for currencies like JPY that are not typically fractional.
     /// - A decimal fraction for currencies like TND that are subdivided into thousandths.
@@ -382,9 +382,9 @@ pub struct Amount {
 
 impl Amount {
     /// Creates a new amount with the required values.
-    pub fn new<S: Into<String>>(currency_code: S, value: S) -> Self {
+    pub fn new(currency_code: Currency, value: &str) -> Self {
         Amount {
-            currency_code: currency_code.into(),
+            currency_code,
             value: value.into(),
             breakdown: None,
         }
@@ -690,8 +690,9 @@ impl super::Client {
         let res = build.json(&invoice).send().await?;
 
         if res.status().is_success() {
-            let x = res.json::<Invoice>().await?;
-            Ok(x)
+            println!("{:#?}", res.text().await?);
+            //let x = res.json::<Invoice>().await?;
+            Ok(())
         } else {
             Err(res.json::<PaypalError>().await?.into())
         }
@@ -912,3 +913,4 @@ mod tests {
         println!("{:?}", list);
     }
 }
+

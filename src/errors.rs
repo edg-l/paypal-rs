@@ -11,9 +11,9 @@ pub struct PaypalError {
     /// The error name.
     pub name: String,
     /// The error message.
-    pub message: String,
+    pub message: Option<String>,
     /// Paypal debug id
-    pub debug_id: String,
+    pub debug_id: Option<String>,
     /// Error details
     pub details: Vec<HashMap<String, String>>,
     /// Only available on Identity errors

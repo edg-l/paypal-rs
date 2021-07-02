@@ -1,11 +1,4 @@
-use paypal_rs::{
-    Client,
-    HeaderParams,
-    Prefer,
-    invoice::*,
-    common::*,
-    errors::*,
-};
+use paypal_rs::{common::*, errors::*, invoice::*, Client, HeaderParams, Prefer};
 
 #[tokio::main]
 async fn main() -> Result<(), ResponseError> {
@@ -41,35 +34,33 @@ async fn main() -> Result<(), ResponseError> {
             email_address: Some("merchant@example.com".to_owned()),
             additional_notes: None,
         }),
-        items: vec![
-            Item {
-                id: None,
-                name: "My item".to_owned(),
-                unit_amount: Money {
-                    currency_code: Currency::EUR,
-                    value: "10.0".to_owned()
-                },
-                quantity: "1".to_owned(),
-                discount: None,
-                item_date: None,
-                description: Some("A random item".to_owned()),
-                tax: Some(Tax {
-                    name: "Sales tax".to_owned(),
-                    percent: "7".to_owned(),
-                    amount: None,
-                }),
-                unit_of_measure: Some(UnitOfMeasure::Quantity),
-            }
-        ],
+        items: vec![Item {
+            id: None,
+            name: "My item".to_owned(),
+            unit_amount: Money {
+                currency_code: Currency::EUR,
+                value: "10.0".to_owned(),
+            },
+            quantity: "1".to_owned(),
+            discount: None,
+            item_date: None,
+            description: Some("A random item".to_owned()),
+            tax: Some(Tax {
+                name: "Sales tax".to_owned(),
+                percent: "7".to_owned(),
+                amount: None,
+            }),
+            unit_of_measure: Some(UnitOfMeasure::Quantity),
+        }],
         ..Default::default()
     };
     match client.create_draft_invoice(payload, HeaderParams::default()).await {
         Ok(r) => {
             println!("{:#?}", r);
-        },
+        }
         Err(ResponseError::HttpError(e)) => {
             println!("{}", e);
-        },
+        }
         Err(e) => {
             println!("{:#?}", e);
         }

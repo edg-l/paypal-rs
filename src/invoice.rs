@@ -690,9 +690,9 @@ impl super::Client {
         let res = build.json(&invoice).send().await?;
 
         if res.status().is_success() {
-            println!("{:#?}", res.text().await?);
-            //let x = res.json::<Invoice>().await?;
-            Ok(())
+            //println!("{:#?}", res.text().await?);
+            let inv = res.json::<Invoice>().await?;
+            Ok(inv)
         } else {
             Err(res.json::<PaypalError>().await?.into())
         }
@@ -913,4 +913,3 @@ mod tests {
         println!("{:?}", list);
     }
 }
-

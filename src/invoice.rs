@@ -10,7 +10,6 @@ use crate::common::*;
 use crate::errors::{PaypalError, ResponseError};
 use crate::HeaderParams;
 use bytes::Bytes;
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use std::collections::HashMap;
@@ -125,7 +124,7 @@ pub struct InvoiceDetail {
     /// The invoice number. Default is the number that is auto-incremented number from the last number.
     pub invoice_number: Option<String>,
     /// The invoice date as specificed by the sender
-    pub invoice_date: Option<chrono::DateTime<chrono::Utc>>,
+    pub invoice_date: Option<chrono::NaiveDate>,
     /// The payment due date for the invoice.
     pub payment_term: Option<PaymentTerm>,
     /// The audit metadata
@@ -910,6 +909,6 @@ mod tests {
 
         let list = client.list_invoices(1, 10, HeaderParams::default()).await.unwrap();
 
-        println!("{:?}", list);
+        println!("{:#?}", list);
     }
 }

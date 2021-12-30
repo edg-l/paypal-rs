@@ -1,4 +1,7 @@
-//! [![Crates.io](https://meritbadge.herokuapp.com/paypal-rs)](https://crates.io/crates/paypal-rs)
+//!
+//! [![Version](https://img.shields.io/crates/v/paypal-rs)](https://crates.io/crates/paypal-rs)
+//! [![Downloads](https://img.shields.io/crates/d/paypal-rs)](https://crates.io/crates/paypal-rs)
+//! [![License](https://img.shields.io/crates/l/paypal-rs)](https://crates.io/crates/paypal-rs)
 //! ![Rust](https://github.com/edg-l/paypal-rs/workflows/Rust/badge.svg)
 //! [![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 //!
@@ -88,7 +91,7 @@ use reqwest::header;
 use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use std::time::{Duration, Instant};
+use std::{borrow::Cow, time::{Duration, Instant}};
 
 /// The paypal api endpoint used on a live application.
 pub const LIVE_ENDPOINT: &str = "https://api-m.paypal.com";
@@ -131,7 +134,7 @@ pub struct Auth {
 #[derive(Debug)]
 pub struct Client {
     /// Internal http client
-    pub client: reqwest::Client,
+    pub(crate) client: reqwest::Client,
     /// Whether you are or not in a sandbox enviroment.
     pub sandbox: bool,
     /// Api Auth information
@@ -244,13 +247,13 @@ impl Client {
     ///     client.get_access_token().await.unwrap();
     /// }
     /// ```
-    pub fn new<S: Into<String>>(client_id: S, secret: S, sandbox: bool) -> Client {
+    pub fn new(client_id: String, secret: String, sandbox: bool) -> Client {
         Client {
             client: reqwest::Client::new(),
             sandbox,
             auth: Auth {
-                client_id: client_id.into(),
-                secret: secret.into(),
+                client_id,
+                secret,
                 access_token: None,
                 expires: None,
             },
@@ -365,11 +368,37 @@ impl Client {
     }
 }
 
+pub(crate) trait FromResponse: Sized {
+    type Response;
+
+    fn from_response(res: Self::Response) -> Self;
+}
+
+pub(crate) trait Endpoint {
+    type Query: Serialize;
+    type Body: Serialize;
+    type Response: FromResponse;
+
+    fn path(&self) -> Cow<str>;
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::GET
+    }
+
+    fn query(&self) -> Option<&Self::Query> {
+        None
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::common::Currency;
     use crate::countries::Country;
-    use crate::{orders::*, Client, HeaderParams, Prefer};
+    use crate::{orders::*, Client, HeaderParams};
     use std::env;
     use std::str::FromStr;
 
@@ -378,9 +407,7 @@ mod tests {
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
         let secret = env::var("PAYPAL_SECRET").unwrap();
 
-        let client = Client::new(clientid, secret, true);
-
-        client
+        Client::new(clientid, secret, true)
     }
 
     #[tokio::test]

@@ -273,12 +273,19 @@ pub enum AuthorizationStatus {
     Pending,
 }
 
-/// Details about the status of the authorization.
+/// Authorization status reason.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum AuthorizationStatusDetails {
+pub enum AuthorizationStatusDetailsReason {
     /// Authorization is pending manual review.
     PendingReview,
+}
+
+/// Details about the status of the authorization.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct AuthorizationStatusDetails {
+    /// The reason why the authorized status is PENDING.
+    pub reason: AuthorizationStatusDetailsReason,
 }
 
 /// A payment authorization.
@@ -306,10 +313,10 @@ pub enum CaptureStatus {
     Refunded,
 }
 
-/// Details about the captured payment status.
+/// Capture status reason.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum CaptureStatusDetails {
+pub enum CaptureStatusDetailsReason {
     /// The payer initiated a dispute for this captured payment with PayPal.
     BuyerComplaint,
     /// The captured funds were reversed in response to the payer disputing this captured payment with
@@ -338,6 +345,13 @@ pub enum CaptureStatusDetails {
     VerificationRequired,
 }
 
+/// Details about the captured payment status.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct CaptureStatusDetails {
+    /// The reason why the captured payment status is PENDING or DENIED.
+    pub reason: CaptureStatusDetailsReason,
+}
+
 /// A captured payment.
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -360,12 +374,19 @@ pub enum RefundStatus {
     Completed,
 }
 
-/// The reason why the refund has the PENDING or FAILED status.
+/// Refund status reason.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum RefundStatusDetails {
+pub enum RefundStatusDetailsReason {
     /// The customer's account is funded through an eCheck, which has not yet cleared.
     Echeck,
+}
+
+/// Details about the status of the refund.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RefundStatusDetails {
+    /// The reason why the refund has the PENDING or FAILED status.
+    pub reason: RefundStatusDetailsReason,
 }
 
 /// A refund

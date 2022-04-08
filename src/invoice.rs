@@ -891,24 +891,21 @@ impl super::Client {
 
 #[cfg(test)]
 mod tests {
-    use crate::{invoice::*, Client, HeaderParams};
+    use crate::{Client, HeaderParams};
 
     async fn create_client() -> Client {
         dotenv::dotenv().ok();
         let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
         let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
-        let client = Client::new(clientid, secret, true);
-
-        client
+        Client::new(clientid, secret, true)
     }
 
     #[tokio::test]
-    async fn test_invoice() {
+    async fn test_invoice() -> anyhow::Result<()> {
         let mut client = create_client().await;
 
-        let list = client.list_invoices(1, 10, HeaderParams::default()).await.unwrap();
-
-        println!("{:#?}", list);
+        let _list = client.list_invoices(1, 10, HeaderParams::default()).await?;
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
 //! Errors created by this crate.
-use crate::common::LinkDescription;
+use crate::data::common::LinkDescription;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;

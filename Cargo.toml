@@ -22,6 +22,8 @@ jsonwebtoken = "8.0.1"
 base64 = "0.13.0"
 log = "0.4.16"
 bytes = "1.1.0"
+derive_builder = "0.11.1"
+serde_qs = "0.9.1"
 
 [dev-dependencies]
 tokio = { version = "1.17.0", features = ["macros", "rt-multi-thread"] }

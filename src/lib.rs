@@ -19,10 +19,9 @@
 //! ```rust
 //! use paypal_rs::{
 //!     Client,
-//!     HeaderParams,
-//!     Prefer,
-//!     orders::{OrderPayload, Intent, PurchaseUnit, Amount},
-//!     common::Currency,
+//!     api::orders::*,
+//!     data::orders::*,
+//!     data::common::Currency,
 //! };
 //!
 //! #[tokio::main]
@@ -35,18 +34,15 @@
 //!
 //!     client.get_access_token().await.unwrap();
 //!
-//!     let order_payload = OrderPayload::new(
-//!         Intent::Authorize,
-//!         vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
-//!     );
+//!     let order = OrderPayloadBuilder::default()
+//!         .intent(Intent::Authorize)
+//!         .purchase_units(vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))])
+//!         .build().unwrap();
 //!
-//!     let order = client
-//!         .create_order(
-//!             order_payload,
-//!             HeaderParams::default(),
-//!         )
-//!         .await
-//!         .unwrap();
+//!     let create_order = CreateOrder::new(order);
+//!    
+//!     let _order_created = client
+//!         .execute(create_order).await.unwrap();
 //! }
 //! ```
 //!
@@ -78,69 +74,24 @@
 //! - [ ] Webhooks Management API - 0.14.0
 //! - [ ] Payment Experience Web Profiles API - 1.0.0
 
-#![deny(missing_docs)]
+//#![deny(missing_docs)]
 
-pub mod common;
+pub mod api;
 pub mod countries;
+pub mod data;
+pub mod endpoint;
 pub mod errors;
-pub mod invoice;
-pub mod orders;
+pub mod client;
+pub use client::*;
 
-use errors::{PaypalError, ResponseError};
-use reqwest::header;
-use reqwest::header::HeaderMap;
-use serde::{Deserialize, Serialize};
+use derive_builder::Builder;
+use serde::Serialize;
 use serde_with::skip_serializing_none;
-use std::{borrow::Cow, time::{Duration, Instant}};
 
 /// The paypal api endpoint used on a live application.
 pub const LIVE_ENDPOINT: &str = "https://api-m.paypal.com";
 /// The paypal api endpoint used on when testing.
 pub const SANDBOX_ENDPOINT: &str = "https://api-m.sandbox.paypal.com";
-
-/// Represents the access token returned by the OAuth2 authentication.
-///
-/// https://developer.paypal.com/docs/api/get-an-access-token-postman/
-#[derive(Debug, Deserialize)]
-pub struct AccessToken {
-    /// The OAuth2 scopes.
-    pub scope: String,
-    /// The access token.
-    pub access_token: String,
-    /// The token type.
-    pub token_type: String,
-    /// The app id.
-    pub app_id: String,
-    /// Seconds until it expires.
-    pub expires_in: u64,
-    /// The nonce.
-    pub nonce: String,
-}
-
-/// Stores OAuth2 information.
-#[derive(Debug)]
-pub struct Auth {
-    /// Your client id.
-    pub client_id: String,
-    /// The secret.
-    pub secret: String,
-    /// The access token returned by oauth2 authentication.
-    pub access_token: Option<AccessToken>,
-    /// Used to check when the token expires.
-    pub expires: Option<(Instant, Duration)>,
-}
-
-/// Represents a client used to interact with the paypal api.
-#[derive(Debug)]
-pub struct Client {
-    /// Internal http client
-    pub(crate) client: reqwest::Client,
-    /// Whether you are or not in a sandbox enviroment.
-    pub sandbox: bool,
-    /// Api Auth information
-    pub auth: Auth,
-}
-
 /// Represents the query used in most GET api requests.
 ///
 /// Reference: https://developer.paypal.com/docs/api/reference/api-requests/#query-parameters
@@ -151,7 +102,7 @@ pub struct Client {
 /// let query = Query { count: Some(40), ..Default::default() };
 /// ```
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default, Serialize, Builder)]
 pub struct Query {
     /// The number of items to list in the response.
     pub count: Option<i32>,
@@ -181,7 +132,7 @@ pub struct Query {
 }
 
 /// The preferred server response upon successful completion of the request.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Prefer {
     /// The server returns a minimal response to optimize communication between the API caller and the server.
     /// A minimal response includes the id, status and HATEOAS links.
@@ -199,7 +150,7 @@ impl Default for Prefer {
 /// Represents the optional header values used on paypal requests.
 ///
 /// https://developer.paypal.com/docs/api/reference/api-requests/#paypal-auth-assertion
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Builder, Clone)]
 pub struct HeaderParams {
     /// The merchant payer id used on PayPal-Auth-Assertion
     pub merchant_payer_id: Option<String>,
@@ -225,231 +176,20 @@ struct AuthAssertionClaims {
     pub payer_id: String,
 }
 
-impl Client {
-    /// Returns a new client, you must get_access_token afterwards to interact with the api.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use paypal_rs::Client;
-    ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     # dotenv::dotenv().ok();
-    ///     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
-    ///     let secret = std::env::var("PAYPAL_SECRET").unwrap();
-    ///
-    ///     let mut client = Client::new(
-    ///         clientid,
-    ///         secret,
-    ///         true,
-    ///     );
-    ///     client.get_access_token().await.unwrap();
-    /// }
-    /// ```
-    pub fn new(client_id: String, secret: String, sandbox: bool) -> Client {
-        Client {
-            client: reqwest::Client::new(),
-            sandbox,
-            auth: Auth {
-                client_id,
-                secret,
-                access_token: None,
-                expires: None,
-            },
-        }
-    }
-
-    fn endpoint(&self) -> &str {
-        if self.sandbox {
-            SANDBOX_ENDPOINT
-        } else {
-            LIVE_ENDPOINT
-        }
-    }
-
-    /// Sets up the request headers as required on https://developer.paypal.com/docs/api/reference/api-requests/#http-request-headers
-    async fn setup_headers(
-        &mut self,
-        builder: reqwest::RequestBuilder,
-        header_params: HeaderParams,
-    ) -> reqwest::RequestBuilder {
-        // Check if the token hasn't expired here, since it's called before any other call.
-        if let Err(e) = self.get_access_token().await {
-            log::warn!(target: "paypal-rs", "error getting access token: {:?}", e);
-        }
-
-        let mut headers = HeaderMap::new();
-
-        headers.append(header::ACCEPT, "application/json".parse().unwrap());
-
-        if let Some(token) = &self.auth.access_token {
-            headers.append(
-                header::AUTHORIZATION,
-                format!("Bearer {}", token.access_token).parse().unwrap(),
-            );
-        }
-
-        if let Some(merchant_payer_id) = header_params.merchant_payer_id {
-            let claims = AuthAssertionClaims {
-                iss: self.auth.client_id.clone(),
-                payer_id: merchant_payer_id,
-            };
-            let jwt_header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256);
-            let token = jsonwebtoken::encode(
-                &jwt_header,
-                &claims,
-                &jsonwebtoken::EncodingKey::from_secret(self.auth.secret.as_ref()),
-            )
-            .unwrap();
-            let encoded_token = base64::encode(token);
-            headers.append("PayPal-Auth-Assertion", encoded_token.parse().unwrap());
-        }
-
-        if let Some(client_metadata_id) = header_params.client_metadata_id {
-            headers.append("PayPal-Client-Metadata-Id", client_metadata_id.parse().unwrap());
-        }
-
-        if let Some(partner_attribution_id) = header_params.partner_attribution_id {
-            headers.append("PayPal-Partner-Attribution-Id", partner_attribution_id.parse().unwrap());
-        }
-
-        if let Some(request_id) = header_params.request_id {
-            headers.append("PayPal-Request-Id", request_id.parse().unwrap());
-        }
-
-        match header_params.prefer {
-            Prefer::Minimal => headers.append("Prefer", "return=minimal".parse().unwrap()),
-            Prefer::Representation => headers.append("Prefer", "return=representation".parse().unwrap()),
-        };
-
-        if let Some(content_type) = header_params.content_type {
-            headers.append(header::CONTENT_TYPE, content_type.parse().unwrap());
-        }
-
-        builder.headers(headers)
-    }
-
-    /// Gets a access token used in all the api calls.
-    pub async fn get_access_token(&mut self) -> Result<(), ResponseError> {
-        if !self.access_token_expired() {
-            return Ok(());
-        }
-        let res = self
-            .client
-            .post(format!("{}/v1/oauth2/token", self.endpoint()).as_str())
-            .basic_auth(&self.auth.client_id, Some(&self.auth.secret))
-            .header("Content-Type", "x-www-form-urlencoded")
-            .header("Accept", "application/json")
-            .body("grant_type=client_credentials")
-            .send()
-            .await
-            .map_err(ResponseError::HttpError)?;
-
-        if res.status().is_success() {
-            let token = res.json::<AccessToken>().await.map_err(ResponseError::HttpError)?;
-            self.auth.expires = Some((Instant::now(), Duration::new(token.expires_in, 0)));
-            self.auth.access_token = Some(token);
-            Ok(())
-        } else {
-            Err(ResponseError::ApiError(
-                res.json::<PaypalError>().await.map_err(ResponseError::HttpError)?,
-            ))
-        }
-    }
-
-    /// Checks if the access token expired.
-    pub fn access_token_expired(&self) -> bool {
-        if let Some(expires) = self.auth.expires {
-            expires.0.elapsed() >= expires.1
-        } else {
-            true
-        }
-    }
-}
-
-pub(crate) trait FromResponse: Sized {
-    type Response;
-
-    fn from_response(res: Self::Response) -> Self;
-}
-
-pub(crate) trait Endpoint {
-    type Query: Serialize;
-    type Body: Serialize;
-    type Response: FromResponse;
-
-    fn path(&self) -> Cow<str>;
-
-    fn method(&self) -> reqwest::Method {
-        reqwest::Method::GET
-    }
-
-    fn query(&self) -> Option<&Self::Query> {
-        None
-    }
-
-    fn body(&self) -> Option<&Self::Body> {
-        None
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::common::Currency;
-    use crate::countries::Country;
-    use crate::{orders::*, Client, HeaderParams};
+    use crate::{countries::Country};
+    use crate::data::common::Currency;
+    use crate::{Client};
     use std::env;
     use std::str::FromStr;
 
-    async fn create_client() -> Client {
+    pub async fn create_client() -> Client {
         dotenv::dotenv().ok();
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
         let secret = env::var("PAYPAL_SECRET").unwrap();
 
         Client::new(clientid, secret, true)
-    }
-
-    #[tokio::test]
-    async fn test_order() {
-        let mut client = create_client().await;
-
-        let order = OrderPayload::new(
-            Intent::Authorize,
-            vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
-        );
-
-        let ref_id = format!(
-            "TEST-{:?}",
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-        );
-
-        let order_created = client
-            .create_order(
-                order,
-                HeaderParams {
-                    request_id: Some(ref_id.clone()),
-                    ..Default::default()
-                },
-            )
-            .await
-            .unwrap();
-
-        assert_ne!(order_created.id, "");
-        assert_eq!(order_created.status, OrderStatus::Created);
-        assert_eq!(order_created.links.len(), 4);
-
-        client
-            .update_order(
-                &order_created.id,
-                Some(Intent::Capture),
-                Some(order_created.purchase_units.expect("to exist")),
-            )
-            .await
-            .unwrap();
     }
 
     #[test]

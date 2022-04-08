@@ -1,17 +1,12 @@
-//! An order represents a payment between two or more parties.
-//!
-//! Use the Orders API to create, update, retrieve, authorize, and capture orders.
-//!
-//! Reference: https://developer.paypal.com/docs/api/orders/v2/
-
-use crate::common::*;
+use super::common::*;
 use crate::errors::{PaypalError, ResponseError};
 use crate::HeaderParams;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Intent {
     /// The merchant intends to capture payment immediately after the customer makes a payment.
@@ -33,7 +28,7 @@ impl Default for Intent {
 /// Represents a payer name.
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-payer.name
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 pub struct PayerName {
     /// When the party is a person, the party's given, or first, name.
     pub given_name: String,
@@ -43,7 +38,7 @@ pub struct PayerName {
 }
 
 /// The phone number, in its canonical international E.164 numbering plan format.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 pub struct PhoneNumber {
     /// The national number, in its canonical international E.164 numbering plan format.
     /// The combined length of the country calling code (CC) and the national number must not be greater than 15 digits.
@@ -54,7 +49,7 @@ pub struct PhoneNumber {
 /// The phone number of the customer. Available only when you enable the
 /// Contact Telephone Number option in the Profile & Settings for the merchant's PayPal account.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Phone {
     /// The phone type.
     pub phone_type: Option<PhoneType>,
@@ -63,7 +58,7 @@ pub struct Phone {
 }
 
 /// The customer's tax ID type. Supported for the PayPal payment method only.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(non_camel_case_types)]
 pub enum TaxIdType {
@@ -74,7 +69,7 @@ pub enum TaxIdType {
 }
 
 /// The tax information of the payer.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TaxInfo {
     /// The customer's tax ID. Supported for the PayPal payment method only.
     /// Typically, the tax ID is 11 characters long for individuals and 14 characters long for businesses.
@@ -87,7 +82,7 @@ pub struct TaxInfo {
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-payer
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Payer {
     /// The name of the payer.
     pub name: Option<PayerName>,
@@ -108,7 +103,7 @@ pub struct Payer {
 
 /// Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Breakdown {
     /// The subtotal for all items. Required if the request includes purchase_units[].items[].unit_amount.
     /// Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
@@ -129,7 +124,7 @@ pub struct Breakdown {
 
 /// Represents an amount of money.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,
@@ -156,7 +151,7 @@ impl Amount {
 
 /// The merchant who receives payment for this transaction.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Payee {
     /// The email address of merchant.
     pub email_address: Option<String>,
@@ -166,7 +161,7 @@ pub struct Payee {
 
 /// Fees, commissions, tips, or donations
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PlatformFee {
     /// The fee for this transaction.
     pub amount: Money,
@@ -176,7 +171,7 @@ pub struct PlatformFee {
 }
 
 /// The funds that are held on behalf of the merchant
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 pub enum DisbursementMode {
     /// The funds are released to the merchant immediately.
     Instant,
@@ -194,7 +189,7 @@ impl Default for DisbursementMode {
 
 /// Any additional payment instructions for PayPal Commerce Platform customers.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations.
     pub platform_fees: Option<Vec<PlatformFee>>,
@@ -203,7 +198,7 @@ pub struct PaymentInstruction {
 }
 
 /// The item category type.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemCategoryType {
     /// Goods that are stored, delivered, and used in their electronic format.
@@ -222,7 +217,7 @@ impl Default for ItemCategoryType {
 
 /// The name and address of the person to whom to ship the items.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ShippingDetail {
     /// The name of the person to whom to ship the items. Supports only the full_name property.
     pub name: Option<String>,
@@ -232,7 +227,7 @@ pub struct ShippingDetail {
 
 /// Represents an item.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Item {
     /// The item name or title.
     pub name: String,
@@ -252,7 +247,7 @@ pub struct Item {
 }
 
 /// The status of the payment authorization.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatus {
     /// The authorized payment is created. No captured payments have been made for this authorized payment.
@@ -274,7 +269,7 @@ pub enum AuthorizationStatus {
 }
 
 /// Authorization status reason.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AuthorizationStatusDetailsReason {
     /// Authorization is pending manual review.
@@ -282,14 +277,14 @@ pub enum AuthorizationStatusDetailsReason {
 }
 
 /// Details about the status of the authorization.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 pub struct AuthorizationStatusDetails {
     /// The reason why the authorized status is PENDING.
     pub reason: AuthorizationStatusDetailsReason,
 }
 
 /// A payment authorization.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 pub struct AuthorizationWithData {
     /// The status for the authorized payment.
     pub status: AuthorizationStatus,
@@ -298,7 +293,7 @@ pub struct AuthorizationWithData {
 }
 
 /// The capture status.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatus {
     /// The funds for this captured payment were credited to the payee's PayPal account.
@@ -314,7 +309,7 @@ pub enum CaptureStatus {
 }
 
 /// Capture status reason.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CaptureStatusDetailsReason {
     /// The payer initiated a dispute for this captured payment with PayPal.
@@ -346,7 +341,7 @@ pub enum CaptureStatusDetailsReason {
 }
 
 /// Details about the captured payment status.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 pub struct CaptureStatusDetails {
     /// The reason why the captured payment status is PENDING or DENIED.
     pub reason: CaptureStatusDetailsReason,
@@ -354,7 +349,7 @@ pub struct CaptureStatusDetails {
 
 /// A captured payment.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 pub struct Capture {
     /// The status of the captured payment.
     pub status: CaptureStatus,
@@ -363,7 +358,7 @@ pub struct Capture {
 }
 
 /// The status of the refund
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RefundStatus {
     /// The refund was cancelled.
@@ -375,7 +370,7 @@ pub enum RefundStatus {
 }
 
 /// Refund status reason.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RefundStatusDetailsReason {
     /// The customer's account is funded through an eCheck, which has not yet cleared.
@@ -383,14 +378,14 @@ pub enum RefundStatusDetailsReason {
 }
 
 /// Details about the status of the refund.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct RefundStatusDetails {
     /// The reason why the refund has the PENDING or FAILED status.
     pub reason: RefundStatusDetailsReason,
 }
 
 /// A refund
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct Refund {
     /// The status of the refund.
     pub status: RefundStatus,
@@ -399,7 +394,7 @@ pub struct Refund {
 }
 
 /// The comprehensive history of payments for the purchase unit.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaymentCollection {
     /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
     #[serde(default)]
@@ -414,7 +409,7 @@ pub struct PaymentCollection {
 
 /// Represents either a full or partial order that the payer intends to purchase from the payee.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct PurchaseUnit {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
     /// If you omit this value and the order contains only one purchase unit, PayPal sets this value to default.
@@ -469,7 +464,7 @@ impl PurchaseUnit {
 }
 
 /// The type of landing page to show on the PayPal site for customer checkout.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LandingPage {
     /// When the customer clicks PayPal Checkout, the customer is redirected to a page to log in to PayPal and approve the payment.
@@ -490,7 +485,7 @@ impl Default for LandingPage {
 }
 
 /// The shipping preference
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ShippingPreference {
     /// Use the customer-provided shipping address on the PayPal site.
@@ -508,7 +503,7 @@ impl Default for ShippingPreference {
 }
 
 /// Configures a Continue or Pay Now checkout flow.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserAction {
     /// After you redirect the customer to the PayPal payment page, a Continue button appears. Use this option when
@@ -528,7 +523,7 @@ impl Default for UserAction {
 }
 
 /// The merchant-preferred payment sources.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PayeePreferred {
     /// Accepts any type of payment from the customer.
@@ -547,7 +542,7 @@ impl Default for PayeePreferred {
 
 /// A payment method.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct PaymentMethod {
     /// The customer-selected payment method on the merchant site.
     pub payer_selected: Option<String>,
@@ -557,7 +552,7 @@ pub struct PaymentMethod {
 
 /// Customize the payer experience during the approval process for the payment with PayPal.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site.
     pub brand_name: Option<String>,
@@ -581,7 +576,8 @@ pub struct ApplicationContext {
 
 /// A order payload to be used when creating an order.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
     pub intent: Intent,
@@ -722,179 +718,3 @@ pub struct Order {
     /// An array of request-related HATEOAS links. To complete payer approval, use the approve link to redirect the payer.
     pub links: Vec<LinkDescription>,
 }
-
-impl super::Client {
-    /// Creates an order. Supports orders with only one purchase unit.
-    pub async fn create_order(
-        &mut self,
-        order: OrderPayload,
-        header_params: HeaderParams,
-    ) -> Result<Order, ResponseError> {
-        let builder = {
-            self.setup_headers(
-                self.client.post(&format!("{}/v2/checkout/orders", self.endpoint())),
-                header_params,
-            )
-            .await
-        };
-        let res = builder.json(&order).send().await?;
-
-        if res.status().is_success() {
-            let order = res.json::<Order>().await?;
-            Ok(order)
-        } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
-        }
-    }
-
-    /// Used internally for order requests that have no body.
-    async fn build_endpoint_order(
-        &mut self,
-        order_id: &str,
-        endpoint: &str,
-        post: bool,
-        header_params: crate::HeaderParams,
-    ) -> Result<Order, ResponseError> {
-        let format = format!("{}/v2/checkout/orders/{}/{}", self.endpoint(), order_id, endpoint);
-
-        let builder = self
-            .setup_headers(
-                match post {
-                    true => self.client.post(&format),
-                    false => self.client.get(&format),
-                },
-                header_params,
-            )
-            .await;
-
-        let res = builder.send().await?;
-
-        if res.status().is_success() {
-            let order = res.json::<Order>().await?;
-            Ok(order)
-        } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
-        }
-    }
-
-    /// Updates an order with the CREATED or APPROVED status.
-    /// You cannot update an order with the COMPLETED status.
-    ///
-    /// Only replacing the existing purchase units and intent is supported right now.
-    ///
-    /// Note: You can only update the intent from Authorize to Capture
-    ///
-    /// More info on what you can change: https://developer.paypal.com/docs/api/orders/v2/#orders_patch
-    pub async fn update_order(
-        &mut self,
-        id: &str,
-        intent: Option<Intent>,
-        purchase_units: Option<Vec<PurchaseUnit>>,
-    ) -> Result<(), ResponseError> {
-        let mut intent_json = String::new();
-        let units_json = String::new();
-
-        if let Some(p_units) = purchase_units {
-            let mut units_json = String::new();
-
-            for (i, unit) in p_units.iter().enumerate() {
-                let unit_str = serde_json::to_string(&unit).expect("error serializing purchase unit");
-                let mut unit_json = format!(
-                    r#"
-                {{
-                    "op": "replace",
-                    "path": "/purchase_units/@reference_id='{reference_id}'",
-                    "value": {unit}
-                }}
-                "#,
-                    reference_id = unit.reference_id.clone().unwrap_or_else(|| String::from("default")),
-                    unit = unit_str
-                );
-
-                if i < p_units.len() - 1 {
-                    unit_json += ",";
-                }
-
-                units_json.push_str(&unit_json);
-            }
-        }
-
-        if let Some(x) = intent {
-            let intent_str = match x {
-                Intent::Authorize => String::from("AUTHORIZE"),
-                Intent::Capture => String::from("CAPTURE"),
-            };
-
-            intent_json = format!(
-                r#"
-                {{
-                    "op": "replace",
-                    "path": "/intent",
-                    "value": "{intent}"
-                }}
-                "#,
-                intent = intent_str
-            );
-        }
-
-        let final_json = {
-            if !intent_json.is_empty() && !units_json.is_empty() {
-                format!("[{},{}]", intent_json, units_json)
-            } else {
-                format!("[{}{}]", intent_json, units_json)
-            }
-        };
-
-        let builder = {
-            self.setup_headers(
-                self.client
-                    .patch(&format!("{}/v2/checkout/orders/{}", self.endpoint(), id)),
-                crate::HeaderParams {
-                    content_type: Some(String::from("application/json")),
-                    ..Default::default()
-                },
-            )
-            .await
-        };
-
-        let res = builder.body(final_json.clone()).send().await?;
-
-        if res.status().is_success() {
-            Ok(())
-        } else {
-            Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
-        }
-    }
-
-    /// Shows details for an order, by ID.
-    pub async fn show_order_details(&mut self, order_id: &str) -> Result<Order, ResponseError> {
-        self.build_endpoint_order(order_id, "", false, HeaderParams::default())
-            .await
-    }
-
-    /// Captures payment for an order. To successfully capture payment for an order,
-    /// the buyer must first approve the order or a valid payment_source must be provided in the request.
-    /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
-    pub async fn capture_order(
-        &mut self,
-        order_id: &str,
-        header_params: crate::HeaderParams,
-    ) -> Result<Order, ResponseError> {
-        self.build_endpoint_order(order_id, "capture", true, header_params)
-            .await
-    }
-
-    /// Authorizes payment for an order. To successfully authorize payment for an order,
-    /// the buyer must first approve the order or a valid payment_source must be provided in the request.
-    /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
-    pub async fn authorize_order(
-        &mut self,
-        order_id: &str,
-        header_params: HeaderParams,
-    ) -> Result<Order, ResponseError> {
-        self.build_endpoint_order(order_id, "authorize", true, header_params)
-            .await
-    }
-}
-
-// TODO: Add strong typed support for order errors in body: https://developer.paypal.com/docs/api/orders/v2/#errors

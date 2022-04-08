@@ -8,7 +8,7 @@ use std::str::FromStr;
 /// The phone type.
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(missing_docs)]
 pub enum PhoneType {
@@ -21,7 +21,7 @@ pub enum PhoneType {
 
 /// The non-portable additional address details
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct AddressDetails {
     /// The street number.
     pub street_number: Option<String>,
@@ -40,7 +40,7 @@ pub struct AddressDetails {
 
 /// The address of the payer.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Address {
     /// The first line of the address. For example, number or street. For example, 173 Drury Lane.
     /// Required for data entry and compliance and risk checks. Must contain the full address.

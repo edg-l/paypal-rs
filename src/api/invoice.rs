@@ -6,195 +6,265 @@
 //!
 //! Reference: https://developer.paypal.com/docs/api/invoicing/v2/
 
+use std::borrow::Cow;
 
-/* 
+use derive_builder::Builder;
+use serde::Serialize;
+
+use crate::{
+    data::{
+        invoice::{Invoice, InvoiceList, InvoicePayload, CancelReason},
+        orders::InvoiceNumber,
+    },
+    endpoint::Endpoint,
+    Query,
+};
+
+/// Generates the next invoice number that is available to the merchant.
+///
+/// The next invoice number uses the prefix and suffix from the last invoice number and increments the number by one.
+///
+/// For example, the next invoice number after `INVOICE-1234` is `INVOICE-1235`.
+#[derive(Debug, Default, Clone)]
+pub struct GenerateInvoiceNumber {
+    pub invoice_number: Option<InvoiceNumber>,
+}
+
+impl GenerateInvoiceNumber {
+    pub fn new(invoice_number: Option<InvoiceNumber>) -> Self {
+        Self { invoice_number }
+    }
+}
+
+impl Endpoint for GenerateInvoiceNumber {
+    type Query = ();
+
+    type Body = Option<InvoiceNumber>;
+
+    type Response = InvoiceNumber;
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Borrowed("/v2/invoicing/generate-next-invoice-number")
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::POST
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        Some(&self.invoice_number)
+    }
+}
+
+/// Creates a draft invoice. To move the invoice from a draft to payable state, you must send the invoice.
+/// Include invoice details including merchant information. The invoice object must include an items array.
+#[derive(Debug, Clone)]
+pub struct CreateDraftInvoice {
+    pub invoice: InvoicePayload,
+}
+
+impl CreateDraftInvoice {
+    pub fn new(invoice: InvoicePayload) -> Self {
+        Self { invoice }
+    }
+}
+
+impl Endpoint for CreateDraftInvoice {
+    type Query = ();
+
+    type Body = InvoicePayload;
+
+    type Response = Invoice;
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Borrowed("/v2/invoicing/invoices")
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::POST
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        Some(&self.invoice)
+    }
+}
+
+/// Get an invoice by ID.
+#[derive(Debug, Clone)]
+pub struct GetInvoice {
+    pub invoice_id: String,
+}
+
+impl GetInvoice {
+    pub fn new(invoice_id: String) -> Self {
+        Self { invoice_id }
+    }
+}
+
+impl Endpoint for GetInvoice {
+    type Query = ();
+
+    type Body = ();
+
+    type Response = Invoice;
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Owned(format!("/v2/invoicing/invoices/{}", self.invoice_id))
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::GET
+    }
+}
+
+/// List invoices
+/// Page size has the following limits: [1, 100].
+#[derive(Debug, Clone)]
+pub struct ListInvoices {
+    pub query: Query,
+}
+
+impl ListInvoices {
+    pub fn new(query: Query) -> Self {
+        Self { query }
+    }
+}
+
+impl Endpoint for ListInvoices {
+    type Query = Query;
+
+    type Body = ();
+
+    type Response = InvoiceList;
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Borrowed("/v2/invoicing/invoices")
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::GET
+    }
+
+    fn query(&self) -> Option<&Self::Query> {
+        Some(&self.query)
+    }
+}
+
+/// Delete an invoice
+#[derive(Debug, Clone)]
+pub struct DeleteInvoice {
+    pub invoice_id: String,
+}
+
+impl DeleteInvoice {
+    pub fn new(invoice_id: String) -> Self {
+        Self { invoice_id }
+    }
+}
+
+impl Endpoint for DeleteInvoice {
+    type Query = Query;
+
+    type Body = ();
+
+    type Response = ();
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Owned(format!("/v2/invoicing/invoices/{}", self.invoice_id))
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::DELETE
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Builder)]
+pub struct UpdateInvoiceQuery {
+    pub send_to_recipient: bool,
+    pub send_to_invoicer: bool,
+}
+
+/// Update an invoice.
+/// 
+/// Fully updates an invoice, by ID. In the JSON request body, include a complete invoice object. This call does not support partial updates.
+#[derive(Debug, Clone)]
+pub struct UpdateInvoice {
+    pub invoice: Invoice,
+    pub query: UpdateInvoiceQuery,
+}
+
+impl UpdateInvoice {
+    pub fn new(invoice: Invoice, query: UpdateInvoiceQuery) -> Self {
+        Self {
+            invoice,
+            query
+        }
+    }
+}
+
+impl Endpoint for UpdateInvoice {
+    type Query = UpdateInvoiceQuery;
+
+    type Body = Invoice;
+
+    type Response = Invoice;
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Owned(format!("/v2/invoicing/invoices/{}", self.invoice.id))
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::PUT
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        Some(&self.invoice)
+    }
+
+    fn query(&self) -> Option<&Self::Query> {
+        Some(&self.query)
+    }
+}
+
+/// Cancel an invoice.
+#[derive(Debug, Clone)]
+pub struct CancelInvoice {
+    pub invoice_id: String,
+    pub reason: CancelReason
+}
+
+impl CancelInvoice {
+    pub fn new(invoice_id: String, reason: CancelReason) -> Self {
+        Self {
+            invoice_id,
+            reason
+        }
+    }
+}
+
+impl Endpoint for CancelInvoice {
+    type Query = ();
+
+    type Body = CancelReason;
+
+    type Response = ();
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Owned(format!("/v2/invoicing/invoices/{}/cancel", self.invoice_id))
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::POST
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        Some(&self.reason)
+    }
+}
+
+/*
 
 impl super::Client {
-    /// Generates the next invoice number that is available to the merchant.
-    ///
-    /// The next invoice number uses the prefix and suffix from the last invoice number and increments the number by one.
-    ///
-    /// For example, the next invoice number after `INVOICE-1234` is `INVOICE-1235`.
-    pub async fn generate_invoice_number(
-        &mut self,
-        header_params: crate::HeaderParams,
-    ) -> Result<String, ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client
-                    .post(format!("{}/v2/invoicing/generate-next-invoice-number", self.endpoint()).as_str()),
-                header_params,
-            )
-            .await;
-
-        let res = build.send().await?;
-
-        if res.status().is_success() {
-            let x = res.json::<HashMap<String, String>>().await?;
-            Ok(x.get("invoice_number").expect("to have a invoice number").clone())
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// Creates a draft invoice. To move the invoice from a draft to payable state, you must send the invoice.
-    /// Include invoice details including merchant information. The invoice object must include an items array.
-    pub async fn create_draft_invoice(
-        &mut self,
-        invoice: InvoicePayload,
-        header_params: HeaderParams,
-    ) -> Result<Invoice, ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client
-                    .post(format!("{}/v2/invoicing/invoices", self.endpoint()).as_str()),
-                header_params,
-            )
-            .await;
-
-        let res = build.json(&invoice).send().await?;
-
-        if res.status().is_success() {
-            //println!("{:#?}", res.text().await?);
-            let inv = res.json::<Invoice>().await?;
-            Ok(inv)
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// Get an invoice by ID.
-    pub async fn get_invoice(
-        &mut self,
-        invoice_id: &str,
-        header_params: HeaderParams,
-    ) -> Result<Invoice, ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client
-                    .post(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
-                header_params,
-            )
-            .await;
-
-        let res = build.send().await?;
-
-        if res.status().is_success() {
-            let x = res.json::<Invoice>().await?;
-            Ok(x)
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// List invoices
-    /// Page size has the following limits: [1, 100].
-    pub async fn list_invoices(
-        &mut self,
-        page: i32,
-        page_size: i32,
-        header_params: HeaderParams,
-    ) -> Result<InvoiceList, ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client.get(
-                    format!(
-                        "{}/v2/invoicing/invoices?page={}&page_size={}&total_required=true",
-                        self.endpoint(),
-                        page,
-                        page_size
-                    )
-                    .as_str(),
-                ),
-                header_params,
-            )
-            .await;
-
-        let res = build.send().await?;
-
-        if res.status().is_success() {
-            let x = res.json::<InvoiceList>().await?;
-            Ok(x)
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// Delete a invoice
-    pub async fn delete_invoice(&mut self, invoice_id: &str, header_params: HeaderParams) -> Result<(), ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client
-                    .delete(format!("{}/v2/invoicing/invoices/{}", self.endpoint(), invoice_id).as_str()),
-                header_params,
-            )
-            .await;
-
-        let res = build.send().await?;
-
-        if res.status().is_success() {
-            Ok(())
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// Update a invoice
-    pub async fn update_invoice(
-        &mut self,
-        invoice: Invoice,
-        send_to_recipient: bool,
-        send_to_invoicer: bool,
-        header_params: HeaderParams,
-    ) -> Result<(), ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client.put(
-                    format!(
-                        "{}/v2/invoicing/invoices/{}?send_to_recipient={}&send_to_invoicer={}",
-                        self.endpoint(),
-                        invoice.id,
-                        send_to_recipient,
-                        send_to_invoicer
-                    )
-                    .as_str(),
-                ),
-                header_params,
-            )
-            .await;
-
-        let res = build.send().await?;
-
-        if res.status().is_success() {
-            Ok(())
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
-
-    /// Cancel a invoice
-    pub async fn cancel_invoice(
-        &mut self,
-        invoice_id: &str,
-        reason: CancelReason,
-        header_params: HeaderParams,
-    ) -> Result<(), ResponseError> {
-        let build = self
-            .setup_headers(
-                self.client
-                    .post(format!("{}/v2/invoicing/invoices/{}/cancel", self.endpoint(), invoice_id,).as_str()),
-                header_params,
-            )
-            .await;
-
-        let res = build.json(&reason).send().await?;
-
-        if res.status().is_success() {
-            Ok(())
-        } else {
-            Err(res.json::<PaypalError>().await?.into())
-        }
-    }
 
     /// Generate a QR code
     pub async fn generate_qr_code(

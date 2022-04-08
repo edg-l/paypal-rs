@@ -6,7 +6,7 @@ use std::time::Instant;
 use crate::{
     endpoint::Endpoint,
     errors::{PaypalError, ResponseError},
-    AuthAssertionClaims, HeaderParams, Prefer, LIVE_ENDPOINT, SANDBOX_ENDPOINT,
+    AuthAssertionClaims, HeaderParams, LIVE_ENDPOINT, SANDBOX_ENDPOINT,
 };
 
 /// Represents the access token returned by the OAuth2 authentication.
@@ -140,10 +140,7 @@ impl Client {
             headers.append("PayPal-Request-Id", request_id.parse().unwrap());
         }
 
-        match header_params.prefer {
-            Prefer::Minimal => headers.append("Prefer", "return=minimal".parse().unwrap()),
-            Prefer::Representation => headers.append("Prefer", "return=representation".parse().unwrap()),
-        };
+        headers.append("Prefer", "return=representation".parse().unwrap());
 
         if let Some(content_type) = header_params.content_type {
             headers.append(header::CONTENT_TYPE, content_type.parse().unwrap());

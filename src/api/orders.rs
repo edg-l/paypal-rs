@@ -1,3 +1,7 @@
+//! An order represents a payment between two or more parties. Use the Orders API to create, update, retrieve, authorize, and capture orders.
+//! 
+//! https://developer.paypal.com/docs/api/orders/v2/
+
 use std::borrow::Cow;
 
 use crate::{

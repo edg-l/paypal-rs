@@ -1,9 +1,10 @@
 use crate::{data::common::*, data::common::LinkDescription};
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 /// Paypal File reference
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FileReference {
     /// The ID of the referenced file.
     pub id: String,
@@ -17,7 +18,7 @@ pub struct FileReference {
     pub size: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// The payment term type.
 pub enum PaymentTermType {
@@ -42,7 +43,7 @@ pub enum PaymentTermType {
 }
 
 /// The payment due date for the invoice.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaymentTerm {
     /// The payment term. Payment can be due upon receipt, a specified date, or in a set number of days
     pub term_type: PaymentTermType,
@@ -51,7 +52,7 @@ pub struct PaymentTerm {
 }
 
 /// Flow type
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// The flow variation
 pub enum FlowType {
@@ -65,7 +66,7 @@ pub enum FlowType {
 
 /// Metadata about a resource
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Metadata {
     /// The date and time when the resource was created
     pub create_time: Option<chrono::DateTime<chrono::Utc>>,
@@ -95,7 +96,7 @@ pub struct Metadata {
 
 /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InvoiceDetail {
     /// The reference data. Includes a post office (PO) number.
     pub reference: Option<String>,
@@ -121,7 +122,7 @@ pub struct InvoiceDetail {
 
 /// A name to be used as recipient, etc.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Name {
     /// The prefix, or title, to the party's name.
     pub prefix: Option<String>,
@@ -144,7 +145,7 @@ pub struct Name {
 
 /// Phone information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct PhoneDetail {
     /// The country calling code (CC), in its canonical international E.164 numbering plan format.
     pub country_code: String,
@@ -158,7 +159,7 @@ pub struct PhoneDetail {
 
 /// The invoicer information.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InvoicerInfo {
     /// Required. The business name of the party.
     pub business_name: String,
@@ -181,7 +182,7 @@ pub struct InvoicerInfo {
 
 /// Billing information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct BillingInfo {
     /// Required. The business name of the party.
     pub business_name: String,
@@ -201,7 +202,7 @@ pub struct BillingInfo {
 
 /// Contact information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ContactInformation {
     /// Required. The business name of the party.
     pub business_name: String,
@@ -213,7 +214,7 @@ pub struct ContactInformation {
 
 /// Recipient information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct RecipientInfo {
     /// The billing information for the invoice recipient. Includes name, address, email, phone, and language.
     pub billing_info: Option<BillingInfo>,
@@ -223,7 +224,7 @@ pub struct RecipientInfo {
 
 /// Tax information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Tax {
     /// The name of the tax applied on the invoice items.
     pub name: String,
@@ -234,7 +235,7 @@ pub struct Tax {
 }
 
 /// Discount information
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Discount {
     /// The discount as a percentage value. Value is from 0 to 100. Supports up to five decimal places.
     pub percent: Option<String>,
@@ -243,7 +244,7 @@ pub struct Discount {
 }
 
 /// The unit of measure for the invoiced item.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UnitOfMeasure {
     /// The unit of measure is quantity. This invoice template is typically used for physical goods.
@@ -256,7 +257,7 @@ pub enum UnitOfMeasure {
 
 /// Item information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Item {
     /// The ID of the invoice line item.
     /// Read only.
@@ -281,7 +282,7 @@ pub struct Item {
 
 /// The partial payment details.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PartialPayment {
     /// Indicates whether the invoice allows a partial payment. If false, the invoice must be paid in full. If true, the invoice allows partial payments.
     pub allow_partial_payment: Option<bool>,
@@ -291,7 +292,7 @@ pub struct PartialPayment {
 
 /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Configuration {
     /// Indicates whether the tax is calculated before or after a discount. If false, the tax is calculated before a discount. If true, the tax is calculated after a discount.
     pub tax_calculated_after_discount: Option<bool>,
@@ -308,7 +309,7 @@ pub struct Configuration {
 
 /// The discount
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct AggregatedDiscount {
     /// The discount as a percent or amount at invoice level. The invoice discount amount is subtracted from the item total.
     pub invoice_discount: Option<Discount>,
@@ -317,7 +318,7 @@ pub struct AggregatedDiscount {
 }
 
 /// The shipping fee
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ShippingCost {
     /// The shipping amount. Value is from 0 to 1000000. Supports up to two decimal places.
     pub amount: Option<Money>,
@@ -327,7 +328,7 @@ pub struct ShippingCost {
 
 /// The custom amount to apply to an invoice
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct CustomAmount {
     /// The label to the custom amount of the invoice.
     pub label: String,
@@ -337,7 +338,7 @@ pub struct CustomAmount {
 
 /// The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, custom amount, shipping and discounts, if any.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Breakdown {
     /// The subtotal for all items. Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
     pub item_total: Option<Money>,
@@ -353,7 +354,7 @@ pub struct Breakdown {
 
 /// Represents an amount of money.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,
@@ -379,7 +380,7 @@ impl Amount {
 }
 
 /// The payment type in an invoicing flow
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PaymentType {
     /// The payment type is PayPal.
@@ -389,7 +390,7 @@ pub enum PaymentType {
 }
 
 /// The payment mode or method through which the invoicer can accept the payment.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PaymentMethod {
     /// Payments can be received through bank transfers.
@@ -418,7 +419,7 @@ impl Default for PaymentMethod {
 
 /// Payment detail
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaymentDetail {
     /// The payment type in an invoicing flow which can be PayPal or an external cash or check payment.
     pub r#type: Option<PaymentType>,
@@ -438,7 +439,7 @@ pub struct PaymentDetail {
 
 /// Payments registered against the invoice
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Payments {
     /// The aggregated payment amounts against this invoice.
     /// Read only.
@@ -450,7 +451,7 @@ pub struct Payments {
 
 /// Refund details
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RefundDetail {
     /// The PayPal refund type. Indicates whether the refund was paid through PayPal or externally in the invoicing flow.
     pub r#type: Option<PaymentType>,
@@ -466,7 +467,7 @@ pub struct RefundDetail {
 
 /// List of refunds
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Refunds {
     /// The aggregated refund amounts.
     /// Read only.
@@ -477,7 +478,7 @@ pub struct Refunds {
 }
 
 /// The status of the invoice
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Status {
     ///  The invoice is in draft state. It is not yet sent to the payer.
@@ -508,7 +509,7 @@ pub enum Status {
 
 /// An invoice payload
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InvoicePayload {
     /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,
@@ -533,7 +534,7 @@ pub struct InvoicePayload {
 
 /// Definition: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_get
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Invoice {
     /// The ID of the invoice.
     pub id: String,
@@ -583,7 +584,7 @@ pub struct InvoiceList {
 
 /// Cancel invoice reason
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
 pub struct CancelReason {
     /// The subject of the email that is sent as a notification to the recipient.
     pub subject: Option<String>,

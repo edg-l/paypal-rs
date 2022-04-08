@@ -602,7 +602,7 @@ impl OrderPayload {
 }
 
 /// The card brand or network.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardBrand {
     /// Visa card.
@@ -639,7 +639,7 @@ pub enum CardBrand {
     ChinaUnionPay,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(missing_docs)]
 pub enum CardType {
@@ -650,7 +650,7 @@ pub enum CardType {
 }
 
 /// The payment card to use to fund a payment.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CardResponse {
     /// The last digits of the payment card.
     pub last_digits: String,
@@ -662,7 +662,7 @@ pub struct CardResponse {
 }
 
 /// The customer's wallet used to fund the transaction.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct WalletResponse {
     /// Apple Pay Wallet response information.
     pub apple_pay: CardResponse,
@@ -717,4 +717,9 @@ pub struct Order {
     pub status: OrderStatus,
     /// An array of request-related HATEOAS links. To complete payer approval, use the approve link to redirect the payer.
     pub links: Vec<LinkDescription>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InvoiceNumber {
+    pub invoice_number: String,
 }

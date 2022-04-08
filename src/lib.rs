@@ -102,7 +102,7 @@ pub const SANDBOX_ENDPOINT: &str = "https://api-m.sandbox.paypal.com";
 /// let query = Query { count: Some(40), ..Default::default() };
 /// ```
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Builder)]
+#[derive(Debug, Default, Serialize, Builder, Clone)]
 pub struct Query {
     /// The number of items to list in the response.
     pub count: Option<i32>,
@@ -131,22 +131,6 @@ pub struct Query {
     // TODO: Use https://github.com/samscott89/serde_qs
 }
 
-/// The preferred server response upon successful completion of the request.
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub enum Prefer {
-    /// The server returns a minimal response to optimize communication between the API caller and the server.
-    /// A minimal response includes the id, status and HATEOAS links.
-    Minimal,
-    /// The server returns a complete resource representation, including the current state of the resource.
-    Representation,
-}
-
-impl Default for Prefer {
-    fn default() -> Self {
-        Prefer::Representation
-    }
-}
-
 /// Represents the optional header values used on paypal requests.
 ///
 /// https://developer.paypal.com/docs/api/reference/api-requests/#paypal-auth-assertion
@@ -164,8 +148,6 @@ pub struct HeaderParams {
     /// You can make these calls any number of times without concern that the server creates or completes an action on a resource more than once.
     /// You can retry calls that fail with network timeouts or the HTTP 500 status code. You can retry calls for as long as the server stores the ID.
     pub request_id: Option<String>,
-    /// The preferred server response upon successful completion of the request.
-    pub prefer: Prefer,
     /// The media type. Required for operations with a request body.
     pub content_type: Option<String>,
 }

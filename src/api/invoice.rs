@@ -27,10 +27,12 @@ use crate::{
 /// For example, the next invoice number after `INVOICE-1234` is `INVOICE-1235`.
 #[derive(Debug, Default, Clone)]
 pub struct GenerateInvoiceNumber {
+    /// The invoice number. If you omit this value, the default is the auto-incremented number from the last number.
     pub invoice_number: Option<InvoiceNumber>,
 }
 
 impl GenerateInvoiceNumber {
+    /// New constructor.
     pub fn new(invoice_number: Option<InvoiceNumber>) -> Self {
         Self { invoice_number }
     }
@@ -60,10 +62,12 @@ impl Endpoint for GenerateInvoiceNumber {
 /// Include invoice details including merchant information. The invoice object must include an items array.
 #[derive(Debug, Clone)]
 pub struct CreateDraftInvoice {
+    /// The invoice details.
     pub invoice: InvoicePayload,
 }
 
 impl CreateDraftInvoice {
+    /// New constructor.
     pub fn new(invoice: InvoicePayload) -> Self {
         Self { invoice }
     }
@@ -89,13 +93,15 @@ impl Endpoint for CreateDraftInvoice {
     }
 }
 
-/// Get an invoice by ID.
+/// Shows details for an invoice, by ID.
 #[derive(Debug, Clone)]
 pub struct GetInvoice {
+    /// The invoice id.
     pub invoice_id: String,
 }
 
 impl GetInvoice {
+    /// New constructor.
     pub fn new(invoice_id: String) -> Self {
         Self { invoice_id }
     }
@@ -117,14 +123,16 @@ impl Endpoint for GetInvoice {
     }
 }
 
-/// List invoices
+/// Lists invoices. To filter the invoices that appear in the response, you can specify one or more optional query parameters.
 /// Page size has the following limits: [1, 100].
 #[derive(Debug, Clone)]
 pub struct ListInvoices {
+    /// The endpoint query.
     pub query: Query,
 }
 
 impl ListInvoices {
+    /// New constructor.
     pub fn new(query: Query) -> Self {
         Self { query }
     }
@@ -150,13 +158,19 @@ impl Endpoint for ListInvoices {
     }
 }
 
-/// Delete an invoice
+/// Deletes a draft or scheduled invoice, by ID. Deletes invoices in the draft or scheduled state only. 
+/// 
+/// For invoices that have already been sent, you can cancel the invoice. 
+/// 
+/// After you delete a draft or scheduled invoice, you can no longer use it or show its details. However, you can reuse its invoice number.
 #[derive(Debug, Clone)]
 pub struct DeleteInvoice {
+    /// The invocie id.
     pub invoice_id: String,
 }
 
 impl DeleteInvoice {
+    /// New constructor.
     pub fn new(invoice_id: String) -> Self {
         Self { invoice_id }
     }
@@ -178,9 +192,12 @@ impl Endpoint for DeleteInvoice {
     }
 }
 
+/// The update invoice query.
 #[derive(Debug, Clone, Serialize, Builder)]
 pub struct UpdateInvoiceQuery {
+    /// Indicates whether to send the invoice update notification to the recipient.
     pub send_to_recipient: bool,
+    /// Indicates whether to send the invoice update notification to the merchant.
     pub send_to_invoicer: bool,
 }
 
@@ -189,11 +206,14 @@ pub struct UpdateInvoiceQuery {
 /// Fully updates an invoice, by ID. In the JSON request body, include a complete invoice object. This call does not support partial updates.
 #[derive(Debug, Clone)]
 pub struct UpdateInvoice {
+    /// The updated invoice object.
     pub invoice: Invoice,
+    /// The update invoice query.
     pub query: UpdateInvoiceQuery,
 }
 
 impl UpdateInvoice {
+    /// New constructor.
     pub fn new(invoice: Invoice, query: UpdateInvoiceQuery) -> Self {
         Self {
             invoice,
@@ -226,14 +246,17 @@ impl Endpoint for UpdateInvoice {
     }
 }
 
-/// Cancel an invoice.
+/// Cancels a sent invoice, by ID, and, optionally, sends a notification about the cancellation to the payer, merchant, and CC: emails.
 #[derive(Debug, Clone)]
 pub struct CancelInvoice {
+    /// The invoice id.
     pub invoice_id: String,
+    /// The reason of the cancelation.
     pub reason: CancelReason
 }
 
 impl CancelInvoice {
+    /// New constructor.
     pub fn new(invoice_id: String, reason: CancelReason) -> Self {
         Self {
             invoice_id,

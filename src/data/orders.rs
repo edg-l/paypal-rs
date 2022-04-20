@@ -1,3 +1,5 @@
+//! Paypal object definitions used by the orders api.
+
 use super::common::*;
 use crate::errors::{PaypalError, ResponseError};
 use crate::HeaderParams;
@@ -719,7 +721,9 @@ pub struct Order {
     pub links: Vec<LinkDescription>,
 }
 
+/// An invoice number.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InvoiceNumber {
+    /// The invoice number.
     pub invoice_number: String,
 }

@@ -1,3 +1,5 @@
+//! Paypal object definitions used in the invoice api.
+
 use crate::{data::common::*, data::common::LinkDescription};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};

@@ -4,17 +4,24 @@
 
 use std::borrow::Cow;
 
+use derive_builder::Builder;
+use serde::Serialize;
+use serde_json::json;
+
 use crate::{
     data::orders::{Order, OrderPayload, PaymentSourceResponse},
     endpoint::Endpoint,
 };
 
+/// Creates an order.
 #[derive(Debug)]
 pub struct CreateOrder {
-    order: OrderPayload,
+    /// The order payload.
+    pub order: OrderPayload,
 }
 
 impl CreateOrder {
+    /// New constructor.
     pub fn new(order: OrderPayload) -> Self {
         Self { order }
     }
@@ -42,12 +49,15 @@ impl Endpoint for CreateOrder {
 
 // TODO: Update order.
 
+/// Query an order by id.
 #[derive(Debug)]
 pub struct ShowOrderDetails {
-    order_id: String,
+    /// The order id.
+    pub order_id: String,
 }
 
 impl ShowOrderDetails {
+    /// New constructor.
     pub fn new(order_id: &str) -> Self {
         Self {
             order_id: order_id.to_string(),
@@ -71,16 +81,48 @@ impl Endpoint for ShowOrderDetails {
     }
 }
 
-#[derive(Debug)]
+/// The payment source used to fund the payment.
+#[derive(Debug, Serialize, Builder, Clone)]
+pub struct PaymentSourceToken {
+    /// The PayPal-generated ID for the token.
+    pub id: String,
+    /// The tokenization method that generated the ID.
+    /// 
+    /// Can only be BILLING_AGREEMENT.
+    pub r#type: String,
+}
+
+/// Payment source used in the capture order endpoint.
+#[derive(Debug, Serialize, Builder, Clone)]
+pub struct PaymentSource {
+    /// The tokenized payment source to fund a payment.
+    pub token: PaymentSourceToken,
+}
+
+/// The capture order endpoint body.
+#[derive(Debug, Serialize, Clone)]
+pub struct PaymentSourceBody {
+    /// The payment source definition.
+    pub payment_source: PaymentSource,
+}
+
+/// Captures payment for an order. To successfully capture payment for an order, 
+/// the buyer must first approve the order or a valid payment_source must be provided in the request. 
+/// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
+#[derive(Debug, Clone, Builder)]
 pub struct CaptureOrder {
-    order_id: String,
-    // TODO: payment source? https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+    /// The id of the order.
+    pub order_id: String,
+    /// The endpoint body.
+    pub body: Option<PaymentSourceBody>
 }
 
 impl CaptureOrder {
+    /// New constructor.
     pub fn new(order_id: &str) -> Self {
         Self {
             order_id: order_id.to_string(),
+            body: None,
         }
     }
 }
@@ -88,7 +130,7 @@ impl CaptureOrder {
 impl Endpoint for CaptureOrder {
     type Query = ();
 
-    type Body = ();
+    type Body = PaymentSourceBody;
 
     type Response = Order;
 
@@ -99,18 +141,29 @@ impl Endpoint for CaptureOrder {
     fn method(&self) -> reqwest::Method {
         reqwest::Method::POST
     }
+
+    fn body(&self) -> Option<&Self::Body> {
+        self.body.as_ref()
+    }
 }
 
+/// Authorizes payment for an order. To successfully authorize payment for an order, 
+/// the buyer must first approve the order or a valid payment_source must be provided in the request. 
+/// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
 #[derive(Debug)]
 pub struct AuthorizeOrder {
+    /// The order id.
     order_id: String,
-    // TODO: payment source? https://developer.paypal.com/docs/api/orders/v2/#orders_authorize
+    /// The endpoint body.
+    pub body: Option<PaymentSourceBody>
 }
 
 impl AuthorizeOrder {
+    /// New constructor.
     pub fn new(order_id: &str) -> Self {
         Self {
             order_id: order_id.to_string(),
+            body: None,
         }
     }
 }
@@ -118,7 +171,7 @@ impl AuthorizeOrder {
 impl Endpoint for AuthorizeOrder {
     type Query = ();
 
-    type Body = ();
+    type Body = PaymentSourceBody;
 
     type Response = Order;
 
@@ -128,6 +181,10 @@ impl Endpoint for AuthorizeOrder {
 
     fn method(&self) -> reqwest::Method {
         reqwest::Method::POST
+    }
+
+    fn body(&self) -> Option<&Self::Body> {
+        self.body.as_ref()
     }
 }
 

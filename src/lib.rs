@@ -74,7 +74,7 @@
 //! - [ ] Webhooks Management API - 0.14.0
 //! - [ ] Payment Experience Web Profiles API - 1.0.0
 
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 
 pub mod api;
 pub mod countries;

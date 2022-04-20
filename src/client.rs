@@ -1,3 +1,5 @@
+//! The paypal api wrapper client, which holds the http request client.
+
 use reqwest::header::{self, HeaderMap};
 use serde::Deserialize;
 use std::time::Duration;
@@ -186,6 +188,7 @@ impl Client {
         }
     }
 
+    /// Executes the given endpoint with the given headers.
     pub async fn execute_ext<E>(&self, endpoint: E, headers: HeaderParams) -> Result<E::Response, ResponseError>
     where
         E: Endpoint,
@@ -214,6 +217,9 @@ impl Client {
         }
     }
 
+    /// Executes the given endpoints with the default headers.
+    /// 
+    /// You must remember to call `get_access_token` first or this may fail due to not being authed.
     pub async fn execute<E>(&self, endpoint: E) -> Result<E::Response, ResponseError>
     where
         E: Endpoint,

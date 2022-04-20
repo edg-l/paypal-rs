@@ -1,8 +1,8 @@
 //! This module contains the endpoint trait used to implemented api endpoints.
 
+use crate::{LIVE_ENDPOINT, SANDBOX_ENDPOINT};
+use serde::{de::DeserializeOwned, Serialize};
 use std::borrow::Cow;
-use serde::{Serialize, de::DeserializeOwned};
-use crate::{SANDBOX_ENDPOINT, LIVE_ENDPOINT};
 
 /// A trait implemented by api endpoints.
 pub trait Endpoint {
@@ -30,7 +30,7 @@ pub trait Endpoint {
     }
 
     /// The full path of this endpoint.
-    /// 
+    ///
     /// Automatically implemented.
     fn full_path(&self, is_sandbox: bool) -> String {
         if is_sandbox {

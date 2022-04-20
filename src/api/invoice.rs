@@ -13,7 +13,7 @@ use serde::Serialize;
 
 use crate::{
     data::{
-        invoice::{Invoice, InvoiceList, InvoicePayload, CancelReason},
+        invoice::{CancelReason, Invoice, InvoiceList, InvoicePayload},
         orders::InvoiceNumber,
     },
     endpoint::Endpoint,
@@ -158,10 +158,10 @@ impl Endpoint for ListInvoices {
     }
 }
 
-/// Deletes a draft or scheduled invoice, by ID. Deletes invoices in the draft or scheduled state only. 
-/// 
-/// For invoices that have already been sent, you can cancel the invoice. 
-/// 
+/// Deletes a draft or scheduled invoice, by ID. Deletes invoices in the draft or scheduled state only.
+///
+/// For invoices that have already been sent, you can cancel the invoice.
+///
 /// After you delete a draft or scheduled invoice, you can no longer use it or show its details. However, you can reuse its invoice number.
 #[derive(Debug, Clone)]
 pub struct DeleteInvoice {
@@ -202,7 +202,7 @@ pub struct UpdateInvoiceQuery {
 }
 
 /// Update an invoice.
-/// 
+///
 /// Fully updates an invoice, by ID. In the JSON request body, include a complete invoice object. This call does not support partial updates.
 #[derive(Debug, Clone)]
 pub struct UpdateInvoice {
@@ -215,10 +215,7 @@ pub struct UpdateInvoice {
 impl UpdateInvoice {
     /// New constructor.
     pub fn new(invoice: Invoice, query: UpdateInvoiceQuery) -> Self {
-        Self {
-            invoice,
-            query
-        }
+        Self { invoice, query }
     }
 }
 
@@ -252,16 +249,13 @@ pub struct CancelInvoice {
     /// The invoice id.
     pub invoice_id: String,
     /// The reason of the cancelation.
-    pub reason: CancelReason
+    pub reason: CancelReason,
 }
 
 impl CancelInvoice {
     /// New constructor.
     pub fn new(invoice_id: String, reason: CancelReason) -> Self {
-        Self {
-            invoice_id,
-            reason
-        }
+        Self { invoice_id, reason }
     }
 }
 

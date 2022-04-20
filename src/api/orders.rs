@@ -1,15 +1,14 @@
 //! An order represents a payment between two or more parties. Use the Orders API to create, update, retrieve, authorize, and capture orders.
-//! 
+//!
 //! https://developer.paypal.com/docs/api/orders/v2/
 
 use std::borrow::Cow;
 
 use derive_builder::Builder;
 use serde::Serialize;
-use serde_json::json;
 
 use crate::{
-    data::orders::{Order, OrderPayload, PaymentSourceResponse},
+    data::orders::{Order, OrderPayload},
     endpoint::Endpoint,
 };
 
@@ -87,7 +86,7 @@ pub struct PaymentSourceToken {
     /// The PayPal-generated ID for the token.
     pub id: String,
     /// The tokenization method that generated the ID.
-    /// 
+    ///
     /// Can only be BILLING_AGREEMENT.
     pub r#type: String,
 }
@@ -106,15 +105,15 @@ pub struct PaymentSourceBody {
     pub payment_source: PaymentSource,
 }
 
-/// Captures payment for an order. To successfully capture payment for an order, 
-/// the buyer must first approve the order or a valid payment_source must be provided in the request. 
+/// Captures payment for an order. To successfully capture payment for an order,
+/// the buyer must first approve the order or a valid payment_source must be provided in the request.
 /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
 #[derive(Debug, Clone, Builder)]
 pub struct CaptureOrder {
     /// The id of the order.
     pub order_id: String,
     /// The endpoint body.
-    pub body: Option<PaymentSourceBody>
+    pub body: Option<PaymentSourceBody>,
 }
 
 impl CaptureOrder {
@@ -147,15 +146,15 @@ impl Endpoint for CaptureOrder {
     }
 }
 
-/// Authorizes payment for an order. To successfully authorize payment for an order, 
-/// the buyer must first approve the order or a valid payment_source must be provided in the request. 
+/// Authorizes payment for an order. To successfully authorize payment for an order,
+/// the buyer must first approve the order or a valid payment_source must be provided in the request.
 /// A buyer can approve the order upon being redirected to the rel:approve URL that was returned in the HATEOAS links in the create order response.
 #[derive(Debug)]
 pub struct AuthorizeOrder {
     /// The order id.
     order_id: String,
     /// The endpoint body.
-    pub body: Option<PaymentSourceBody>
+    pub body: Option<PaymentSourceBody>,
 }
 
 impl AuthorizeOrder {

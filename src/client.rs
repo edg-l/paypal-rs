@@ -218,7 +218,7 @@ impl Client {
     }
 
     /// Executes the given endpoints with the default headers.
-    /// 
+    ///
     /// You must remember to call `get_access_token` first or this may fail due to not being authed.
     pub async fn execute<E>(&self, endpoint: E) -> Result<E::Response, ResponseError>
     where

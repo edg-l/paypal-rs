@@ -1,8 +1,6 @@
 //! Paypal object definitions used by the orders api.
 
 use super::common::*;
-use crate::errors::{PaypalError, ResponseError};
-use crate::HeaderParams;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;

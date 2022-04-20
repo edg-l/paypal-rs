@@ -75,13 +75,14 @@
 //! - [ ] Payment Experience Web Profiles API - 1.0.0
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 
 pub mod api;
+pub mod client;
 pub mod countries;
 pub mod data;
 pub mod endpoint;
 pub mod errors;
-pub mod client;
 pub use client::*;
 
 use derive_builder::Builder;
@@ -160,9 +161,9 @@ struct AuthAssertionClaims {
 
 #[cfg(test)]
 mod tests {
-    use crate::{countries::Country};
+    use crate::countries::Country;
     use crate::data::common::Currency;
-    use crate::{Client};
+    use crate::Client;
     use std::env;
     use std::str::FromStr;
 

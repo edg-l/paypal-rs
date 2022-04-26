@@ -82,7 +82,7 @@ pub struct TaxInfo {
 ///
 /// https://developer.paypal.com/docs/api/orders/v2/#definition-payer
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
 pub struct Payer {
     /// The name of the payer.
     pub name: Option<PayerName>,

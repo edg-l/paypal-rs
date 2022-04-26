@@ -1,6 +1,7 @@
 //! Common paypal object definitions used by 2 or more APIs
 
 use crate::errors::InvalidCurrencyError;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use std::str::FromStr;
@@ -61,7 +62,7 @@ pub struct Address {
 }
 
 /// Represents money
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Builder)]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,

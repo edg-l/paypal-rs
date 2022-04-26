@@ -46,8 +46,6 @@ impl Endpoint for CreateOrder {
     }
 }
 
-// TODO: Update order.
-
 /// Query an order by id.
 #[derive(Debug)]
 pub struct ShowOrderDetails {

@@ -98,7 +98,8 @@ pub struct Metadata {
 
 /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct InvoiceDetail {
     /// The reference data. Includes a post office (PO) number.
     pub reference: Option<String>,
@@ -124,7 +125,8 @@ pub struct InvoiceDetail {
 
 /// A name to be used as recipient, etc.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Name {
     /// The prefix, or title, to the party's name.
     pub prefix: Option<String>,
@@ -161,10 +163,11 @@ pub struct PhoneDetail {
 
 /// The invoicer information.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct InvoicerInfo {
     /// Required. The business name of the party.
-    pub business_name: String,
+    pub business_name: Option<String>,
     /// The first and Last name of the recipient.
     pub name: Option<Name>,
     /// The invoicer email address, which must be listed in the user's PayPal profile.
@@ -237,12 +240,13 @@ pub struct Tax {
 }
 
 /// Discount information
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder, Default)]
+#[builder(setter(strip_option, into), default)]
 pub struct Discount {
     /// The discount as a percentage value. Value is from 0 to 100. Supports up to five decimal places.
     pub percent: Option<String>,
     /// The invoice level discount amount. Value is from 0 to 1000000. Supports up to two decimal places.
-    pub amount: Option<String>,
+    pub amount: Option<Box<Amount>>,
 }
 
 /// The unit of measure for the invoiced item.
@@ -259,32 +263,40 @@ pub enum UnitOfMeasure {
 
 /// Item information
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Item {
     /// The ID of the invoice line item.
     /// Read only.
+    #[builder(default)]
     pub id: Option<String>,
     /// The item name for the invoice line item.
     pub name: String,
     /// The item description for the invoice line item.
+    #[builder(default)]
     pub description: Option<String>,
     /// The quantity of the item that the invoicer provides to the payer. Value is from -1000000 to 1000000. Supports up to five decimal places.
     pub quantity: String,
     /// The unit price of the item. This does not include tax and discount. Value is from -1000000 to 1000000. Supports up to two decimal places.
     pub unit_amount: Money,
     /// The tax associated with the item. The tax amount is added to the item total. Value is from 0 to 100. Supports up to five decimal places.
+    #[builder(default)]
     pub tax: Option<Tax>,
     /// The date when the item or service was provided, in Internet date and time format.
+    #[builder(default)]
     pub item_date: Option<chrono::DateTime<chrono::Utc>>,
     /// Discount as a percent or amount at invoice level. The invoice discount amount is subtracted from the item total.
+    #[builder(default)]
     pub discount: Option<Discount>,
     /// The unit of measure for the invoiced item. For AMOUNT the unit_amount and quantity are not shown on the invoice.
+    #[builder(default)]
     pub unit_of_measure: Option<UnitOfMeasure>,
 }
 
 /// The partial payment details.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct PartialPayment {
     /// Indicates whether the invoice allows a partial payment. If false, the invoice must be paid in full. If true, the invoice allows partial payments.
     pub allow_partial_payment: Option<bool>,
@@ -294,7 +306,8 @@ pub struct PartialPayment {
 
 /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Configuration {
     /// Indicates whether the tax is calculated before or after a discount. If false, the tax is calculated before a discount. If true, the tax is calculated after a discount.
     pub tax_calculated_after_discount: Option<bool>,
@@ -311,7 +324,8 @@ pub struct Configuration {
 
 /// The discount
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct AggregatedDiscount {
     /// The discount as a percent or amount at invoice level. The invoice discount amount is subtracted from the item total.
     pub invoice_discount: Option<Discount>,
@@ -320,7 +334,8 @@ pub struct AggregatedDiscount {
 }
 
 /// The shipping fee
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct ShippingCost {
     /// The shipping amount. Value is from 0 to 1000000. Supports up to two decimal places.
     pub amount: Option<Money>,
@@ -330,17 +345,20 @@ pub struct ShippingCost {
 
 /// The custom amount to apply to an invoice
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct CustomAmount {
     /// The label to the custom amount of the invoice.
     pub label: String,
     /// The custom amount value. Value is from -1000000 to 1000000. Supports up to two decimal places.
+    #[builder(default)]
     pub amount: Option<Money>,
 }
 
 /// The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, custom amount, shipping and discounts, if any.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Breakdown {
     /// The subtotal for all items. Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
     pub item_total: Option<Money>,
@@ -356,7 +374,8 @@ pub struct Breakdown {
 
 /// Represents an amount of money.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,
@@ -367,6 +386,7 @@ pub struct Amount {
     /// For the required number of decimal places for a currency code, see [Currency Codes](https://developer.paypal.com/docs/api/reference/currency-codes/).
     pub value: String,
     /// The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, custom amount, shipping and discounts, if any.
+    #[builder(default)]
     pub breakdown: Option<Breakdown>,
 }
 
@@ -421,27 +441,35 @@ impl Default for PaymentMethod {
 
 /// Payment detail
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct PaymentDetail {
     /// The payment type in an invoicing flow which can be PayPal or an external cash or check payment.
+    #[builder(default)]
     pub r#type: Option<PaymentType>,
     /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type.
+    #[builder(default)]
     pub payment_id: Option<String>,
     /// The date when the invoice was paid, in Internet date and time format.
+    #[builder(default)]
     pub payment_date: Option<chrono::DateTime<chrono::Utc>>,
     /// The payment mode or method through which the invoicer can accept the payment.
     pub method: PaymentMethod,
     /// A note associated with an external cash or check payment.
+    #[builder(default)]
     pub note: Option<String>,
     /// The payment amount to record against the invoice. If you omit this parameter, the total invoice amount is marked as paid. This amount cannot exceed the amount due.
+    #[builder(default)]
     pub amount: Option<Money>,
     /// The recipient's shipping information. Includes the user's contact information, which includes name and address.
+    #[builder(default)]
     pub shipping_info: Option<ContactInformation>,
 }
 
 /// Payments registered against the invoice
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Payments {
     /// The aggregated payment amounts against this invoice.
     /// Read only.
@@ -453,15 +481,20 @@ pub struct Payments {
 
 /// Refund details
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct RefundDetail {
     /// The PayPal refund type. Indicates whether the refund was paid through PayPal or externally in the invoicing flow.
+    #[builder(default)]
     pub r#type: Option<PaymentType>,
     /// The ID for a PayPal payment transaction. Required for the PAYPAL payment type.
+    #[builder(default)]
     pub refund_id: Option<String>,
     /// The date when the invoice was refunded, in Internet date format.
+    #[builder(default)]
     pub refund_date: Option<chrono::DateTime<chrono::Utc>>,
     /// The amount to record as refunded. If you omit the amount, the total invoice paid amount is recorded as refunded.
+    #[builder(default)]
     pub amount: Option<Money>,
     /// The payment mode or method through which the invoicer can accept the payments.
     pub method: PaymentMethod,
@@ -469,7 +502,8 @@ pub struct RefundDetail {
 
 /// List of refunds
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Refunds {
     /// The aggregated refund amounts.
     /// Read only.
@@ -511,7 +545,8 @@ pub enum Status {
 
 /// An invoice payload
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct InvoicePayload {
     /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,
@@ -536,43 +571,56 @@ pub struct InvoicePayload {
 
 /// Definition: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_get
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Invoice {
     /// The ID of the invoice.
     pub id: String,
     /// The parent ID to an invoice that defines the group invoice to which the invoice is related.
+    #[builder(default)]
     pub parent_id: Option<String>,
     /// The status of the invoice.
     pub status: Status,
     /// The details of the invoice. Includes the invoice number, date, payment terms, and audit metadata.
     pub detail: InvoiceDetail,
     /// The invoicer information. Includes the business name, email, address, phone, fax, tax ID, additional notes, and logo URL.
+    #[builder(default)]
     pub invoicer: Option<InvoicerInfo>,
     /// The billing and shipping information. Includes name, email, address, phone and language.
+    #[builder(default)]
     pub primary_recipients: Option<Vec<RecipientInfo>>,
     /// An array of one or more CC: emails to which notifications are sent.
     /// If you omit this parameter, a notification is sent to all CC: email addresses that are part of the invoice.
+    #[builder(default)]
     pub additional_recipients: Option<Vec<String>>,
     /// An array of invoice line item information.
+    #[builder(default)]
     pub items: Option<Vec<Item>>,
     /// The invoice configuration details. Includes partial payment, tip, and tax calculated after discount.
+    #[builder(default)]
     pub configuration: Option<Configuration>,
     /// The invoice amount summary of item total, discount, tax total and shipping..
     pub amount: Amount,
     /// The due amount, which is the balance amount outstanding after payments.
+    #[builder(default)]
     pub due_amount: Option<Money>,
     /// The amount paid by the payer as gratuity to the invoicer.
+    #[builder(default)]
     pub gratuity: Option<Money>,
     /// List of payments registered against the invoice..
+    #[builder(default)]
     pub payments: Option<Payments>,
     /// List of refunds against this invoice. The invoicing refund details includes refund type, date, amount, and method.
+    #[builder(default)]
     pub refunds: Option<Refunds>,
     /// An array of request-related HATEOAS links.
+    #[builder(default)]
     pub links: Option<Vec<LinkDescription>>,
 }
 
 /// A invoice list
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(into))]
 pub struct InvoiceList {
     /// Total items
     pub total_items: i32,

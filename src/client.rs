@@ -210,6 +210,12 @@ impl Client {
         let res = request.send().await?;
 
         if res.status().is_success() {
+            // code to debug responses when parse fails.
+            //let resp_text = res.text().await?;
+            //dbg!(&resp_text);
+            //let mut f = std::fs::File::create("output.txt").unwrap();
+            //f.write_all(resp_text.as_bytes()).ok();
+            //let response_body: E::Response = serde_json::from_str(&resp_text).unwrap();
             let response_body = res.json::<E::Response>().await?;
             Ok(response_body)
         } else {

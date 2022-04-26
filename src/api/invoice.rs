@@ -341,9 +341,13 @@ impl super::Client {
 
     // TODO: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_payments-delete
 }
+*/
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::data::common::*;
+    use crate::data::invoice::*;
     use crate::{Client, HeaderParams};
 
     async fn create_client() -> Client {
@@ -351,16 +355,35 @@ mod tests {
         let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
         let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
-        Client::new(clientid, secret, true)
+        let mut client = Client::new(clientid, secret, true);
+        client.get_access_token().await.unwrap();
+        client
     }
 
     #[tokio::test]
-    async fn test_invoice() -> anyhow::Result<()> {
-        let mut client = create_client().await;
+    async fn test_invoice_creates() -> anyhow::Result<()> {
+        let client = create_client().await;
 
-        let _list = client.list_invoices(1, 10, HeaderParams::default()).await?;
+        let payload = InvoicePayloadBuilder::default()
+            .detail(InvoiceDetailBuilder::default().currency_code(Currency::EUR).build()?)
+            .invoicer(
+                InvoicerInfoBuilder::default()
+                    .name(NameBuilder::default().full_name("Test Person").build()?)
+                    .build()?,
+            )
+            .items(vec![ItemBuilder::default()
+                .name("Some name")
+                .unit_amount(Money {
+                    currency_code: Currency::EUR,
+                    value: "10.0".to_string(),
+                })
+                .quantity("1")
+                .build()?])
+            .build()?;
+
+        let invoice = CreateDraftInvoice::new(payload);
+
+        client.execute(invoice).await?;
         Ok(())
     }
 }
-
-*/

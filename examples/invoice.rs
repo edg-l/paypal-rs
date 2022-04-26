@@ -1,76 +1,41 @@
-/*
-use paypal_rs::{common::*, errors::*, invoice::*, Client, HeaderParams};
+use color_eyre::Result;
+use paypal_rs::data::invoice::*;
+use paypal_rs::{api::invoice::*, data::common::Money};
+use paypal_rs::{data::common::Currency, Client};
 
 #[tokio::main]
-async fn main() -> Result<(), ResponseError> {
+async fn main() -> Result<()> {
+    color_eyre::install()?;
     dotenv::dotenv().ok();
 
-    let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
-    let secret = std::env::var("PAYPAL_SECRET").unwrap();
+    let clientid = std::env::var("PAYPAL_CLIENTID")?;
+    let secret = std::env::var("PAYPAL_SECRET")?;
 
     let mut client = Client::new(clientid, secret, true);
+    client.get_access_token().await?;
 
-    let payload = InvoicePayload {
-        detail: InvoiceDetail {
-            currency_code: Currency::EUR,
-            //reference: Some("deal-ref".to_owned()),
-            ..Default::default()
-        },
-        invoicer: Some(InvoicerInfo {
-            name: Some(Name {
-                given_name: Some("Lucas".to_owned()),
-                prefix: None,
-                suffix: None,
-                surname: None,
-                full_name: None,
-                middle_name: None,
-                alternate_full_name: None,
-            }),
-            phones: None,
-            tax_id: None,
-            website: None,
-            business_name: "Lucas Corp".to_owned(),
-            logo_url: None,
-            // needs to be a valid address...
-            email_address: Some("merchant@example.com".to_owned()),
-            additional_notes: None,
-        }),
-        items: vec![Item {
-            id: None,
-            name: "My item".to_owned(),
-            unit_amount: Money {
+    let payload = InvoicePayloadBuilder::default()
+        .detail(InvoiceDetailBuilder::default().currency_code(Currency::EUR).build()?)
+        .invoicer(
+            InvoicerInfoBuilder::default()
+                .name(NameBuilder::default().full_name("Test Person").build()?)
+                .build()?,
+        )
+        .items(vec![ItemBuilder::default()
+            .name("Some name")
+            .unit_amount(Money {
                 currency_code: Currency::EUR,
-                value: "10.0".to_owned(),
-            },
-            quantity: "1".to_owned(),
-            discount: None,
-            item_date: None,
-            description: Some("A random item".to_owned()),
-            tax: Some(Tax {
-                name: "Sales tax".to_owned(),
-                percent: "7".to_owned(),
-                amount: None,
-            }),
-            unit_of_measure: Some(UnitOfMeasure::Quantity),
-        }],
-        ..Default::default()
-    };
-    match client.create_draft_invoice(payload, HeaderParams::default()).await {
-        Ok(r) => {
-            println!("{:#?}", r);
-        }
-        Err(ResponseError::HttpError(e)) => {
-            println!("{}", e);
-        }
-        Err(e) => {
-            println!("{:#?}", e);
-        }
-    }
+                value: "10.0".to_string(),
+            })
+            .quantity("1")
+            .build()?])
+        .build()?;
 
-    // some stuff is not sent when representation is minimal.
+    let invoice = CreateDraftInvoice::new(payload);
+
+    let res = client.execute(invoice).await?;
+
+    println!("{:#?}", res);
 
     Ok(())
 }
-*/
-
-fn main() {}

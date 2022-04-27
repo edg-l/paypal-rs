@@ -1,4 +1,6 @@
 # paypal-rs
+
+
 [![Version](https://img.shields.io/crates/v/paypal-rs)](https://crates.io/crates/paypal-rs)
 [![Downloads](https://img.shields.io/crates/d/paypal-rs)](https://crates.io/crates/paypal-rs)
 [![License](https://img.shields.io/crates/l/paypal-rs)](https://crates.io/crates/paypal-rs)
@@ -13,23 +15,19 @@ Documentation: https://docs.rs/paypal-rs
 
 Currently in early development.
 
-Note: This README shows how to use the prerelease version, to view the README for `0.1.0` go [here](https://github.com/edg-l/paypal-rs/tree/0.1.0).
-
-Some code in this repository is generated using https://github.com/edg-l/payhelper
-
-## Example
+### Example
 
 ```rust
 use paypal_rs::{
     Client,
-    HeaderParams,
-    Prefer,
-    orders::{OrderPayload, Intent, PurchaseUnit, Amount},
-    common::Currency,
+    api::orders::*,
+    data::orders::*,
+    data::common::Currency,
 };
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
@@ -37,30 +35,24 @@ async fn main() {
 
     client.get_access_token().await.unwrap();
 
-    let order_payload = OrderPayload::new(
-        Intent::Authorize,
-        vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
-    );
+    let order = OrderPayloadBuilder::default()
+        .intent(Intent::Authorize)
+        .purchase_units(vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))])
+        .build().unwrap();
 
-    let order = client
-        .create_order(
-            order_payload,
-            HeaderParams {
-                prefer: Some(Prefer::Representation),
-                ..Default::default()
-            },
-        )
-        .await
-        .unwrap();
+    let create_order = CreateOrder::new(order);
+
+    let _order_created = client
+        .execute(create_order).await.unwrap();
 }
 ```
 
-## Testing
+### Testing
 You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
 
-`cargo test --lib`
+`cargo test`
 
-## Roadmap
+### Roadmap
 
 - [x] Orders API - 0.1.0
 - - [x] Create order
@@ -82,3 +74,5 @@ You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
 - [ ] Vault API - 0.13.0
 - [ ] Webhooks Management API - 0.14.0
 - [ ] Payment Experience Web Profiles API - 1.0.0
+
+License: MIT OR Apache-2.0

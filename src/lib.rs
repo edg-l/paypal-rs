@@ -7,10 +7,6 @@
 //!
 //! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
 //!
-//! Crate: https://crates.io/crates/paypal-rs
-//!
-//! Documentation: https://docs.rs/paypal-rs
-//!
 //! Currently in early development.
 //!
 
@@ -42,7 +38,7 @@
 //!     let create_order = CreateOrder::new(order);
 //!    
 //!     let _order_created = client
-//!         .execute(create_order).await.unwrap();
+//!         .execute(&create_order).await.unwrap();
 //! }
 //! ```
 //!

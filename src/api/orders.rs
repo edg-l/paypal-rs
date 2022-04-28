@@ -187,13 +187,9 @@ impl Endpoint for AuthorizeOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::data::common::Currency;
     use crate::HeaderParams;
-    use crate::{
-        api::orders::{CreateOrder, ShowOrderDetails},
-        data::orders::*,
-        tests::create_client,
-    };
+    use crate::{api::orders::CaptureOrder, data::common::Currency};
+    use crate::{api::orders::*, data::orders::*, tests::create_client};
 
     #[tokio::test]
     async fn test_order() -> anyhow::Result<()> {
@@ -217,7 +213,7 @@ mod tests {
 
         let order_created = client
             .execute_ext(
-                create_order,
+                &create_order,
                 HeaderParams {
                     request_id: Some(ref_id.clone()),
                     ..Default::default()
@@ -233,7 +229,7 @@ mod tests {
 
         let show_order_result = client
             .execute_ext(
-                show_order,
+                &show_order,
                 HeaderParams {
                     request_id: Some(ref_id.clone()),
                     ..Default::default()
@@ -243,6 +239,10 @@ mod tests {
 
         assert_eq!(order_created.id, show_order_result.id);
         assert_eq!(order_created.status, show_order_result.status);
+
+        let capture_order = CaptureOrder::new(&show_order_result.id);
+
+        let _res = client.execute(&capture_order).await?;
 
         Ok(())
     }

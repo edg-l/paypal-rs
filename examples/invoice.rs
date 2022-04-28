@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     let invoice = CreateDraftInvoice::new(payload);
 
-    let res = client.execute(invoice).await?;
+    let res = client.execute(&invoice).await?;
 
     println!("{:#?}", res);
 

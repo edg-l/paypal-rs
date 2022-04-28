@@ -348,7 +348,7 @@ mod tests {
     use super::*;
     use crate::data::common::*;
     use crate::data::invoice::*;
-    use crate::{Client, HeaderParams};
+    use crate::Client;
 
     async fn create_client() -> Client {
         dotenv::dotenv().ok();
@@ -361,7 +361,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_invoice_creates() -> anyhow::Result<()> {
+    async fn test_invoice_create_cancel() -> anyhow::Result<()> {
         let client = create_client().await;
 
         let payload = InvoicePayloadBuilder::default()
@@ -383,7 +383,7 @@ mod tests {
 
         let invoice = CreateDraftInvoice::new(payload);
 
-        client.execute(invoice).await?;
+        let res = client.execute(&invoice).await?;
         Ok(())
     }
 }

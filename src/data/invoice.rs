@@ -635,6 +635,7 @@ pub struct InvoiceList {
 /// Cancel invoice reason
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct CancelReason {
     /// The subject of the email that is sent as a notification to the recipient.
     pub subject: Option<String>,

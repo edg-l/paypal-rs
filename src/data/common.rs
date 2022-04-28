@@ -74,6 +74,27 @@ pub struct Money {
     pub value: String,
 }
 
+macro_rules! impl_money {
+    ($name:ident, $type:expr) => {
+        #[doc=concat!("Creates a instance of Money with the currency ", stringify!($type))]
+        pub fn $name(value: &str) -> Self {
+            Self {
+                currency_code: $type,
+                value: value.to_string(),
+            }
+        }
+    };
+}
+
+impl Money {
+    impl_money!(eur, Currency::EUR);
+    impl_money!(usd, Currency::USD);
+    impl_money!(brl, Currency::BRL);
+    impl_money!(cny, Currency::CNY);
+    impl_money!(czk, Currency::CZK);
+    impl_money!(jpy, Currency::JPY);
+}
+
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(missing_docs)]

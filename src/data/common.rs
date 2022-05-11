@@ -77,7 +77,7 @@ pub struct Money {
 macro_rules! impl_money {
     ($name:ident, $type:expr) => {
         #[doc=concat!("Creates a instance of Money with the currency ", stringify!($type))]
-        pub fn $name(value: &str) -> Self {
+        pub fn $name(value: impl ToString) -> Self {
             Self {
                 currency_code: $type,
                 value: value.to_string(),

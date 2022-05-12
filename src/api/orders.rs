@@ -1,6 +1,6 @@
 //! An order represents a payment between two or more parties. Use the Orders API to create, update, retrieve, authorize, and capture orders.
 //!
-//! https://developer.paypal.com/docs/api/orders/v2/
+//! <https://developer.paypal.com/docs/api/orders/v2/>
 
 use std::borrow::Cow;
 
@@ -41,8 +41,8 @@ impl Endpoint for CreateOrder {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        Some(&self.order)
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.order.clone())
     }
 }
 
@@ -97,10 +97,11 @@ pub struct PaymentSource {
 }
 
 /// The capture order endpoint body.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, Default)]
 pub struct PaymentSourceBody {
     /// The payment source definition.
-    pub payment_source: PaymentSource,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_source: Option<PaymentSource>,
 }
 
 /// Captures payment for an order. To successfully capture payment for an order,
@@ -111,7 +112,7 @@ pub struct CaptureOrder {
     /// The id of the order.
     pub order_id: String,
     /// The endpoint body.
-    pub body: Option<PaymentSourceBody>,
+    pub body: PaymentSourceBody,
 }
 
 impl CaptureOrder {
@@ -119,7 +120,7 @@ impl CaptureOrder {
     pub fn new(order_id: &str) -> Self {
         Self {
             order_id: order_id.to_string(),
-            body: None,
+            body: PaymentSourceBody::default(),
         }
     }
 }
@@ -139,8 +140,8 @@ impl Endpoint for CaptureOrder {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        self.body.as_ref()
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.body.clone())
     }
 }
 
@@ -152,7 +153,7 @@ pub struct AuthorizeOrder {
     /// The order id.
     order_id: String,
     /// The endpoint body.
-    pub body: Option<PaymentSourceBody>,
+    pub body: PaymentSourceBody,
 }
 
 impl AuthorizeOrder {
@@ -160,7 +161,7 @@ impl AuthorizeOrder {
     pub fn new(order_id: &str) -> Self {
         Self {
             order_id: order_id.to_string(),
-            body: None,
+            body: PaymentSourceBody::default(),
         }
     }
 }
@@ -180,8 +181,8 @@ impl Endpoint for AuthorizeOrder {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        self.body.as_ref()
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.body.clone())
     }
 }
 
@@ -194,7 +195,7 @@ mod tests {
     #[tokio::test]
     async fn test_order() -> anyhow::Result<()> {
         let mut client = create_client().await;
-        client.get_access_token().await?;
+        client.get_access_token().await.expect("get access token error");
 
         let order = OrderPayloadBuilder::default()
             .intent(Intent::Authorize)
@@ -219,7 +220,11 @@ mod tests {
                     ..Default::default()
                 },
             )
-            .await?;
+            .await;
+
+        assert!(order_created.is_ok());
+
+        let order_created = order_created?;
 
         assert_ne!(order_created.id, "");
         assert_eq!(order_created.status, OrderStatus::Created);
@@ -235,14 +240,19 @@ mod tests {
                     ..Default::default()
                 },
             )
-            .await?;
+            .await;
+
+        assert!(show_order_result.is_ok());
+
+        let show_order_result = show_order_result?;
 
         assert_eq!(order_created.id, show_order_result.id);
         assert_eq!(order_created.status, show_order_result.status);
 
-        let capture_order = CaptureOrder::new(&show_order_result.id);
+        let authorize_order = AuthorizeOrder::new(&show_order_result.id);
 
-        let _res = client.execute(&capture_order).await?;
+        let res = client.execute(&authorize_order).await;
+        assert!(res.is_err()); // Fails with ORDER_NOT_APPROVED
 
         Ok(())
     }

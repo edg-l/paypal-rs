@@ -1,4 +1,4 @@
-//! Generated using https://github.com/edg-l/payhelper
+//! Generated using <https://github.com/edg-l/payhelper>
 
 use crate::errors::InvalidCountryError;
 use serde::{Deserialize, Serialize};

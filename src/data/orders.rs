@@ -27,7 +27,7 @@ impl Default for Intent {
 
 /// Represents a payer name.
 ///
-/// https://developer.paypal.com/docs/api/orders/v2/#definition-payer.name
+/// <https://developer.paypal.com/docs/api/orders/v2/#definition-payer.name>
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 pub struct PayerName {
     /// When the party is a person, the party's given, or first, name.
@@ -80,7 +80,7 @@ pub struct TaxInfo {
 
 /// The customer who approves and pays for the order. The customer is also known as the payer.
 ///
-/// https://developer.paypal.com/docs/api/orders/v2/#definition-payer
+/// <https://developer.paypal.com/docs/api/orders/v2/#definition-payer>
 #[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
 pub struct Payer {
@@ -428,7 +428,7 @@ pub struct PurchaseUnit {
     pub id: Option<String>,
     /// The soft descriptor is the dynamic text used to construct the statement descriptor that appears on a payer's card statement.
     ///
-    /// More info here: https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit_request
+    /// More info here: <https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit_request>
     pub soft_descriptor: Option<String>,
     /// An array of items that the customer purchases from the merchant.
     pub items: Option<Vec<Item>>,

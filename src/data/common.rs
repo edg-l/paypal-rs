@@ -8,7 +8,7 @@ use std::str::FromStr;
 
 /// The phone type.
 ///
-/// https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type
+/// <https://developer.paypal.com/docs/api/orders/v2/#definition-phone_with_type>
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[allow(missing_docs)]

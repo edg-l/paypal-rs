@@ -13,7 +13,7 @@ use crate::{
 
 /// Represents the access token returned by the OAuth2 authentication.
 ///
-/// https://developer.paypal.com/docs/api/get-an-access-token-postman/
+/// <https://developer.paypal.com/docs/api/get-an-access-token-postman/>
 #[derive(Debug, Deserialize)]
 pub struct AccessToken {
     /// The OAuth2 scopes.
@@ -196,7 +196,7 @@ impl Client {
         let mut url = endpoint.full_path(self.sandbox);
 
         if let Some(query) = endpoint.query() {
-            let query_string = serde_qs::to_string(query).expect("serialize the query correctly");
+            let query_string = serde_qs::to_string(&query).expect("serialize the query correctly");
             url.push_str(&query_string);
         }
 
@@ -204,7 +204,7 @@ impl Client {
         request = self.setup_headers(request, headers).await?;
 
         if let Some(body) = endpoint.body() {
-            request = request.json(body);
+            request = request.json(&body);
         }
 
         let res = request.send().await?;
@@ -225,7 +225,7 @@ impl Client {
 
     /// Executes the given endpoints with the default headers.
     ///
-    /// You must remember to call `get_access_token` first or this may fail due to not being authed.
+    /// You must remember to call [Client::get_access_token] first or this may fail due to not being authed.
     pub async fn execute<E>(&self, endpoint: &E) -> Result<E::Response, ResponseError>
     where
         E: Endpoint,

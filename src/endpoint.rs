@@ -20,12 +20,12 @@ pub trait Endpoint {
     fn method(&self) -> reqwest::Method;
 
     /// The query to be used when calling this endpoint.
-    fn query(&self) -> Option<&Self::Query> {
+    fn query(&self) -> Option<Self::Query> {
         None
     }
 
     /// The body to be used when calling this endpoint.
-    fn body(&self) -> Option<&Self::Body> {
+    fn body(&self) -> Option<Self::Body> {
         None
     }
 
@@ -33,10 +33,14 @@ pub trait Endpoint {
     ///
     /// Automatically implemented.
     fn full_path(&self, is_sandbox: bool) -> String {
+        let relative_path = self.relative_path();
+
+        assert!(relative_path.starts_with('/'), "relative path must start with '/'");
+
         if is_sandbox {
-            format!("{}{}", SANDBOX_ENDPOINT, self.relative_path())
+            format!("{}{}", SANDBOX_ENDPOINT, relative_path)
         } else {
-            format!("{}{}", LIVE_ENDPOINT, self.relative_path())
+            format!("{}{}", LIVE_ENDPOINT, relative_path)
         }
     }
 }

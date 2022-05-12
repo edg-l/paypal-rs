@@ -4,7 +4,7 @@
 //! Customers with a PayPal account can log in and pay the invoice with PayPal. Alternatively,
 //! customers can pay as a guest with a debit card or credit card. For more information, see the Invoicing Overview and the Invoicing Integration Guide.
 //!
-//! Reference: https://developer.paypal.com/docs/api/invoicing/v2/
+//! Reference: <https://developer.paypal.com/docs/api/invoicing/v2/>
 
 use std::borrow::Cow;
 
@@ -53,8 +53,8 @@ impl Endpoint for GenerateInvoiceNumber {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        Some(&self.invoice_number)
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.invoice_number.clone())
     }
 }
 
@@ -88,8 +88,8 @@ impl Endpoint for CreateDraftInvoice {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        Some(&self.invoice)
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.invoice.clone())
     }
 }
 
@@ -153,8 +153,8 @@ impl Endpoint for ListInvoices {
         reqwest::Method::GET
     }
 
-    fn query(&self) -> Option<&Self::Query> {
-        Some(&self.query)
+    fn query(&self) -> Option<Self::Query> {
+        Some(self.query.clone())
     }
 }
 
@@ -234,12 +234,12 @@ impl Endpoint for UpdateInvoice {
         reqwest::Method::PUT
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        Some(&self.invoice)
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.invoice.clone())
     }
 
-    fn query(&self) -> Option<&Self::Query> {
-        Some(&self.query)
+    fn query(&self) -> Option<Self::Query> {
+        Some(self.query.clone())
     }
 }
 
@@ -274,8 +274,8 @@ impl Endpoint for CancelInvoice {
         reqwest::Method::POST
     }
 
-    fn body(&self) -> Option<&Self::Body> {
-        Some(&self.reason)
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.reason.clone())
     }
 }
 
@@ -383,7 +383,7 @@ mod tests {
 
         let invoice = CreateDraftInvoice::new(payload);
 
-        let res = client.execute(&invoice).await?;
+        let _res = client.execute(&invoice).await?;
         Ok(())
     }
 }

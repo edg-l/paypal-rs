@@ -569,7 +569,7 @@ pub struct InvoicePayload {
     pub refunds: Option<Refunds>,
 }
 
-/// Definition: https://developer.paypal.com/docs/api/invoicing/v2/#invoices_get
+/// Definition: <https://developer.paypal.com/docs/api/invoicing/v2/#invoices_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Clone, Builder)]
 #[builder(setter(strip_option, into))]

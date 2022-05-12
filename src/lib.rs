@@ -6,6 +6,8 @@
 //! [![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 //!
 //! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
+//! 
+//! If there is a missing endpoint that you need, you may try to implement the [Endpoint](endpoint::Endpoint) and pass it to [Client::execute](client::Client::execute)
 //!
 //! Currently in early development.
 //!
@@ -91,7 +93,7 @@ pub const LIVE_ENDPOINT: &str = "https://api-m.paypal.com";
 pub const SANDBOX_ENDPOINT: &str = "https://api-m.sandbox.paypal.com";
 /// Represents the query used in most GET api requests.
 ///
-/// Reference: https://developer.paypal.com/docs/api/reference/api-requests/#query-parameters
+/// Reference: <https://developer.paypal.com/docs/api/reference/api-requests/#query-parameters>
 ///
 /// Note: You can avoid most fields by the Default impl like so:
 /// ```
@@ -130,7 +132,7 @@ pub struct Query {
 
 /// Represents the optional header values used on paypal requests.
 ///
-/// https://developer.paypal.com/docs/api/reference/api-requests/#paypal-auth-assertion
+/// <https://developer.paypal.com/docs/api/reference/api-requests/#paypal-auth-assertion>
 #[derive(Debug, Default, Builder, Clone)]
 pub struct HeaderParams {
     /// The merchant payer id used on PayPal-Auth-Assertion

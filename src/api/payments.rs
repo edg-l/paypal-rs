@@ -1,6 +1,6 @@
 //! Call the Payments API to authorize payments, capture authorized payments, refund payments that have already been captured, and show payment information.
 //!
-//! Reference: https://developer.paypal.com/docs/api/payments/v2/
+//! Reference: <https://developer.paypal.com/docs/api/payments/v2/>
 
 use std::borrow::Cow;
 
@@ -41,9 +41,5 @@ impl Endpoint for GetAuthorizedPayment {
 
     fn method(&self) -> reqwest::Method {
         reqwest::Method::GET
-    }
-
-    fn body(&self) -> Option<&Self::Body> {
-        None
     }
 }

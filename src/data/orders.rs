@@ -268,21 +268,6 @@ pub enum AuthorizationStatus {
     Pending,
 }
 
-/// Authorization status reason.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum AuthorizationStatusDetailsReason {
-    /// Authorization is pending manual review.
-    PendingReview,
-}
-
-/// Details about the status of the authorization.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
-pub struct AuthorizationStatusDetails {
-    /// The reason why the authorized status is PENDING.
-    pub reason: AuthorizationStatusDetailsReason,
-}
-
 /// A payment authorization.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
 pub struct AuthorizationWithData {

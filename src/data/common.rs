@@ -111,7 +111,7 @@ pub enum LinkMethod {
 
 /// A HTOAES link
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Eq, PartialEq)]
 pub struct LinkDescription {
     /// The complete target URL.
     pub href: String,
@@ -222,4 +222,50 @@ impl FromStr for Currency {
             cur => Err(InvalidCurrencyError(cur.to_owned())),
         }
     }
+}
+
+/// Details about the status of the authorization.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
+pub struct AuthorizationStatusDetails {
+    /// The reason why the authorized status is PENDING.
+    pub reason: AuthorizationStatusDetailsReason,
+}
+
+/// Authorization status reason.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AuthorizationStatusDetailsReason {
+    /// Authorization is pending manual review.
+    PendingReview,
+}
+
+/// Indicates whether the transaction is eligible for seller protection.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SellerProtectionStatus {
+    /// Your PayPal balance remains intact if the customer claims that they did not receive an item or the account holder claims that they did not authorize the payment.
+    Eligible,
+    /// Your PayPal balance remains intact if the customer claims that they did not receive an item.
+    PartiallyEligible,
+    /// This transaction is not eligible for seller protection.
+    NotEligible,
+}
+
+/// The condition that is covered for the transaction.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DisputeCategory {
+    /// The payer paid for an item that they did not receive.
+    ItemNotReceived,
+    /// The payer did not authorize the payment.
+    UnauthorizedTransaction,
+}
+
+/// The level of protection offered as defined by PayPal Seller Protection for Merchants.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+pub struct SellerProtection {
+    /// Indicates whether the transaction is eligible for seller protection.
+    pub status: SellerProtectionStatus,
+    /// An array of conditions that are covered for the transaction.
+    pub dispute_categories: Vec<DisputeCategory>,
 }

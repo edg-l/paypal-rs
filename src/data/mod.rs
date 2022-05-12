@@ -3,3 +3,4 @@
 pub mod common;
 pub mod invoice;
 pub mod orders;
+pub mod payment;

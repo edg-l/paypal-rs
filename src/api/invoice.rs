@@ -102,8 +102,8 @@ pub struct GetInvoice {
 
 impl GetInvoice {
     /// New constructor.
-    pub fn new(invoice_id: String) -> Self {
-        Self { invoice_id }
+    pub fn new(invoice_id: impl ToString) -> Self {
+        Self { invoice_id: invoice_id.to_string() }
     }
 }
 
@@ -171,8 +171,8 @@ pub struct DeleteInvoice {
 
 impl DeleteInvoice {
     /// New constructor.
-    pub fn new(invoice_id: String) -> Self {
-        Self { invoice_id }
+    pub fn new(invoice_id: impl ToString) -> Self {
+        Self { invoice_id: invoice_id.to_string() }
     }
 }
 
@@ -254,8 +254,8 @@ pub struct CancelInvoice {
 
 impl CancelInvoice {
     /// New constructor.
-    pub fn new(invoice_id: String, reason: CancelReason) -> Self {
-        Self { invoice_id, reason }
+    pub fn new(invoice_id: impl ToString, reason: CancelReason) -> Self {
+        Self { invoice_id: invoice_id.to_string(), reason }
     }
 }
 

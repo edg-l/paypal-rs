@@ -6,7 +6,7 @@
 //! [![Docs](https://docs.rs/paypal-rs/badge.svg)](https://docs.rs/paypal-rs)
 //!
 //! A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
-//! 
+//!
 //! If there is a missing endpoint that you need, you may try to implement the [Endpoint](endpoint::Endpoint) and pass it to [Client::execute](client::Client::execute)
 //!
 //! Currently in early development.

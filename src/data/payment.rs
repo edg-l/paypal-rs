@@ -2,8 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::common::{AuthorizationStatusDetails, Money, SellerProtection, LinkDescription};
-
+use super::common::{AuthorizationStatusDetails, LinkDescription, Money, SellerProtection};
 
 /// Payment Status
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Copy)]

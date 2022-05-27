@@ -215,6 +215,7 @@ impl Default for ItemCategoryType {
     }
 }
 
+/// The name of the person to whom to ship the items.
 #[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ShippingDetailName {

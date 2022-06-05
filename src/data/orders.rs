@@ -215,12 +215,20 @@ impl Default for ItemCategoryType {
     }
 }
 
+/// The name of the person to whom to ship the items.
+#[skip_serializing_none]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct ShippingDetailName {
+    /// The name of the person to whom to ship the items. Supports only the full_name property.
+    pub full_name: String,
+}
+
 /// The name and address of the person to whom to ship the items.
 #[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ShippingDetail {
     /// The name of the person to whom to ship the items. Supports only the full_name property.
-    pub name: Option<String>,
+    pub name: Option<ShippingDetailName>,
     /// The address of the person to whom to ship the items.
     pub address: Option<Address>,
 }

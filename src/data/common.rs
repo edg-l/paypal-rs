@@ -56,7 +56,7 @@ pub struct Address {
     /// The postal code, which is the zip code or equivalent. Typically required for countries with a postal code or an equivalent.
     pub postal_code: Option<String>,
     /// The two-character [ISO 3166-1](https://developer.paypal.com/docs/api/reference/country-codes/) code that identifies the country or region.
-    pub country_code: String,
+    pub country_code: Option<String>,
     /// The non-portable additional address details that are sometimes needed for compliance, risk, or other scenarios where fine-grain address information might be needed.
     pub address_details: Option<AddressDetails>,
 }

@@ -377,13 +377,68 @@ pub struct RefundStatusDetails {
     pub reason: RefundStatusDetailsReason,
 }
 
+/// Exchange rate.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ExchangeRate {
+    /// The source currency from which to convert an amount.
+    pub source_currency: Currency,
+    /// The target currency to which to convert an amount.
+    pub target_currency: Currency,
+    /// The target currency amount. Equivalent to one unit of the source currency. Formatted as integer or decimal value with one to 15 digits to the right of the decimal point.
+    pub value: String,
+}
+
+/// The net breakdown of the refund.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NetAmountBreakdown {
+    /// The converted payable amount.
+    pub converted_amount: Money,
+    /// The exchange rate that determines the amount that was debited from the merchant's PayPal account.
+    pub exchange_rate: ExchangeRate,
+    /// The net amount debited from the merchant's PayPal account.
+    pub payable_amount: Money,
+}
+
+/// The breakdown of the refund.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SellerPayableBreakdown {
+    /// The amount that the payee refunded to the payer.
+    pub gross_amount: Money,
+    /// The net amount that the payee's account is debited in the transaction currency. The net amount is calculated as gross_amount minus paypal_fee minus platform_fees.
+    pub net_amount: Money,
+    /// An array of breakdown values for the net amount. Returned when the currency of the refund is different from the currency of the PayPal account where the payee holds their funds.
+    pub net_amount_breakdown: Option<Vec<NetAmountBreakdown>>,
+    /// The net amount that the payee's account is debited in the receivable currency. Returned only in cases when the receivable currency is different from transaction currency. Example 'CNY'.
+    pub net_amount_in_receivable_currency: Option<Money>,
+    /// The PayPal fee that was refunded to the payer in the currency of the transaction. This fee might not match the PayPal fee that the payee paid when the payment was captured.
+    pub paypal_fee: Money,
+    /// The PayPal fee that was refunded to the payer in the receivable currency. Returned only in cases when the receivable currency is different from transaction currency. Example 'CNY'.
+    pub paypal_fee_in_receivable_currency: Option<Money>,
+    /// An array of platform or partner fees, commissions, or brokerage fees for the refund.
+    pub platform_fees: Option<Vec<PlatformFee>>,
+    /// The total amount refunded from the original capture to date. For example, if a payer makes a $100 purchase and was refunded $20 a week ago and was refunded $30 in this refund, the gross_amount is $30 for this refund and the total_refunded_amount is $50.
+    pub total_refunded_amount: Money,
+}
+
 /// A refund
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Refund {
     /// The status of the refund.
     pub status: RefundStatus,
     /// The details of the refund status.
-    pub status_details: RefundStatusDetails,
+    pub status_details: Option<RefundStatusDetails>,
+    /// The PayPal-generated ID for the refund.
+    pub id: String,
+    /// The amount that the payee refunded to the payer.
+    pub amount: Money,
+    /// The API caller-provided external invoice number for this order. Appears in both the payer's transaction history and the emails that the payer receives.
+    pub invoice_id: Option<String>,
+    /// An array of related HATEOAS links.
+    pub links: Vec<LinkDescription>,
+    /// The reason for the refund. Appears in both the payer's transaction history and the emails that the payer receives.
+    pub note_to_payer: Option<String>,
+    /// The breakdown of the refund.
+    pub seller_payable_breakdown: SellerPayableBreakdown,
 }
 
 /// The comprehensive history of payments for the purchase unit.

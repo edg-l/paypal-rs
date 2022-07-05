@@ -188,8 +188,8 @@ impl Endpoint for AuthorizeOrder {
 
 #[cfg(test)]
 mod tests {
+    use crate::data::common::Currency;
     use crate::HeaderParams;
-    use crate::{api::orders::CaptureOrder, data::common::Currency};
     use crate::{api::orders::*, data::orders::*, tests::create_client};
 
     #[tokio::test]

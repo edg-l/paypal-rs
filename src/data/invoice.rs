@@ -656,7 +656,7 @@ pub const QR_ACTION_PAY: &str = "pay";
 pub const QR_ACTION_DETAILS: &str = "details";
 
 /// QR creation parameters
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
 pub struct QRCodeParams {
     /// The width, in pixels, of the QR code image. Value is from 150 to 500.
     pub width: i32,
@@ -670,15 +670,35 @@ pub struct QRCodeParams {
 
 /// Used to record a payment.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Builder)]
 pub struct RecordPaymentPayload {
-    payment_id: Option<String>,
+    /// The payment id.
+    pub payment_id: Option<String>,
+    /// The payment date
+    pub payment_date: Option<chrono::DateTime<chrono::Utc>>,
+    /// The payment method.
+    pub method: PaymentMethod,
+    /// A note.
+    pub note: Option<String>,
+    /// The amount.
+    pub amount: Amount,
+    /// The shipping info.
+    pub shipping_info: Option<ContactInformation>,
+}
 
-    payment_date: Option<chrono::DateTime<chrono::Utc>>,
-    method: PaymentMethod,
-
-    note: Option<String>,
-    amount: Amount,
-
-    shipping_info: Option<ContactInformation>,
+/// Send Invoice Payload
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize, Default, Builder, Clone)]
+pub struct SendInvoicePayload {
+    /// An array of one or more CC: emails to which notifications are sent.
+    /// If you omit this parameter, a notification is sent to all CC: email addresses that are part of the invoice.
+    pub additional_recipients: Option<Vec<String>>,
+    /// A note to the payer.
+    pub note: Option<String>,
+    /// Indicates whether to send a copy of the email to the merchant.
+    pub send_to_invoicer: Option<bool>,
+    /// Indicates whether to send a copy of the email to the recipient.
+    pub send_to_recipient: Option<bool>,
+    /// The subject of the email that is sent as a notification to the recipient.
+    pub subject: Option<String>,
 }

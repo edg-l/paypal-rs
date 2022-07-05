@@ -13,7 +13,7 @@ use serde::Serialize;
 
 use crate::{
     data::{
-        invoice::{CancelReason, Invoice, InvoiceList, InvoicePayload},
+        invoice::{CancelReason, Invoice, InvoiceList, InvoicePayload, SendInvoicePayload},
         orders::InvoiceNumber,
     },
     endpoint::Endpoint,
@@ -283,6 +283,45 @@ impl Endpoint for CancelInvoice {
 
     fn body(&self) -> Option<Self::Body> {
         Some(self.reason.clone())
+    }
+}
+
+/// Cancels a sent invoice, by ID, and, optionally, sends a notification about the cancellation to the payer, merchant, and CC: emails.
+#[derive(Debug, Clone)]
+pub struct SendInvoice {
+    /// The invoice id.
+    pub invoice_id: String,
+    /// The payload.
+    pub payload: SendInvoicePayload,
+}
+
+impl SendInvoice {
+    /// New constructor.
+    pub fn new(invoice_id: impl ToString, payload: SendInvoicePayload) -> Self {
+        Self {
+            invoice_id: invoice_id.to_string(),
+            payload,
+        }
+    }
+}
+
+impl Endpoint for SendInvoice {
+    type Query = ();
+
+    type Body = SendInvoicePayload;
+
+    type Response = ();
+
+    fn relative_path(&self) -> Cow<str> {
+        Cow::Owned(format!("/v2/invoicing/invoices/{}/send", self.invoice_id))
+    }
+
+    fn method(&self) -> reqwest::Method {
+        reqwest::Method::POST
+    }
+
+    fn body(&self) -> Option<Self::Body> {
+        Some(self.payload.clone())
     }
 }
 

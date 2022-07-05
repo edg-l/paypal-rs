@@ -57,7 +57,21 @@
 //! - - [x] Show order details
 //! - - [x] Authorize payment for order
 //! - - [x] Capture payment for order
-//! - [ ] Invoicing API - 0.2.0
+//! - [x] Invoicing API - 0.2.0
+//! - - [x] Generate Invoice number
+//! - - [x] Create Draft Invoice
+//! - - [x] Show Invoice Details (Get Invoice)
+//! - - [x] List Invoices
+//! - - [x] Delete Invoice
+//! - - [x] Update Invoice
+//! - - [x] Cancel Invoice
+//! - - [x] Send Invoice
+//! - - [ ] Send Invoice Reminder
+//! - - [ ] List Templates
+//! - - [ ] Create Template
+//! - - [ ] Delete Template
+//! - - [ ] Fully Update Template
+//! - - [ ] Show Template Template
 //! - [ ] Payments API - 0.3.0
 //! - [ ] Tracking API - 0.4.0
 //! - [ ] Subscriptions API - 0.5.0

@@ -9,9 +9,7 @@
 
 A rust library that wraps the [paypal api](https://developer.paypal.com/docs/api) asynchronously in a strongly typed manner.
 
-Crate: https://crates.io/crates/paypal-rs
-
-Documentation: https://docs.rs/paypal-rs
+If there is a missing endpoint that you need, you may try to implement the [Endpoint](endpoint::Endpoint) and pass it to [Client::execute](client::Client::execute)
 
 Currently in early development.
 
@@ -43,7 +41,7 @@ async fn main() {
     let create_order = CreateOrder::new(order);
 
     let _order_created = client
-        .execute(create_order).await.unwrap();
+        .execute(&create_order).await.unwrap();
 }
 ```
 
@@ -60,7 +58,21 @@ You need the enviroment variables PAYPAL_CLIENTID and PAYPAL_SECRET to be set.
 - - [x] Show order details
 - - [x] Authorize payment for order
 - - [x] Capture payment for order
-- [ ] Invoicing API - 0.2.0
+- [x] Invoicing API - 0.2.0
+- - [x] Generate Invoice number
+- - [x] Create Draft Invoice
+- - [x] Show Invoice Details (Get Invoice)
+- - [x] List Invoices
+- - [x] Delete Invoice
+- - [x] Update Invoice
+- - [x] Cancel Invoice
+- - [x] Send Invoice
+- - [ ] Send Invoice Reminder
+- - [ ] List Templates
+- - [ ] Create Template
+- - [ ] Delete Template
+- - [ ] Fully Update Template
+- - [ ] Show Template Template
 - [ ] Payments API - 0.3.0
 - [ ] Tracking API - 0.4.0
 - [ ] Subscriptions API - 0.5.0

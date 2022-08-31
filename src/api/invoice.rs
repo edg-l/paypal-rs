@@ -286,7 +286,7 @@ impl Endpoint for CancelInvoice {
     }
 }
 
-/// Cancels a sent invoice, by ID, and, optionally, sends a notification about the cancellation to the payer, merchant, and CC: emails.
+/// Sends or schedules an invoice, by ID, to be sent to a customer.
 #[derive(Debug, Clone)]
 pub struct SendInvoice {
     /// The invoice id.

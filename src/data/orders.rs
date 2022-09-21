@@ -716,13 +716,27 @@ pub struct WalletResponse {
     pub apple_pay: CardResponse,
 }
 
+/// The paypal account used to fund the transaction.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PaypalPaymentSourceResponse {
+    /// The name of the payer.
+    pub name: PayerName,
+    /// The email address of the payer.
+    pub email_address: String,
+    /// The account id of the payer.
+    pub account_id: String,
+}
+
 /// The payment source used to fund the payment.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaymentSourceResponse {
     /// The payment card to use to fund a payment. Card can be a credit or debit card
-    pub card: CardResponse,
+    pub card: Option<CardResponse>,
     /// The customer's wallet used to fund the transaction.
-    pub wallet: WalletResponse,
+    pub wallet: Option<WalletResponse>,
+
+    /// The paypal account used to fund the transaction.
+    pub paypal: Option<PaypalPaymentSourceResponse>,
 }
 
 /// The status of an order.

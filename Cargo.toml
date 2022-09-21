@@ -1,6 +1,6 @@
 [package]
 name = "paypal-rs"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Edgar <git@edgarluque.com>"]
 description = "A library that wraps the paypal api asynchronously."
 repository = "https://github.com/edg-l/paypal-rs/"
@@ -13,10 +13,10 @@ edition = "2021"
 
 
 [dependencies]
-reqwest = { version = "0.11.11", default-features = false, features = ["json"] }
+reqwest = { version = "0.11.12", default-features = false, features = ["json"] }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
-serde_with = "2.0.0"
+serde_with = "2.0.1"
 chrono = { version = "0.4.22", features = ["serde"] }
 jsonwebtoken = "8.1.1"
 base64 = "0.13.0"
@@ -26,9 +26,9 @@ derive_builder = "0.11.2"
 serde_qs = "0.10.1"
 
 [dev-dependencies]
-tokio = { version = "1.21.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.21.1", features = ["macros", "rt-multi-thread"] }
 dotenv = "0.15.0"
-anyhow = "1.0.64"
+anyhow = "1.0.65"
 color-eyre = "0.6.2"
 
 [features]

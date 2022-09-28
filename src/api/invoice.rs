@@ -401,7 +401,7 @@ mod tests {
         let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
         let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
-        let mut client = Client::new(clientid, secret, true);
+        let mut client = Client::new(clientid, secret, crate::PaypalEnv::Sandbox);
         client.get_access_token().await.unwrap();
         client
     }

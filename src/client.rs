@@ -14,7 +14,7 @@ use crate::{
 /// Represents the access token returned by the OAuth2 authentication.
 ///
 /// <https://developer.paypal.com/docs/api/get-an-access-token-postman/>
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AccessToken {
     /// The OAuth2 scopes.
     pub scope: String,
@@ -31,7 +31,7 @@ pub struct AccessToken {
 }
 
 /// Stores OAuth2 information.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Auth {
     /// Your client id.
     pub client_id: String,
@@ -44,14 +44,42 @@ pub struct Auth {
 }
 
 /// Represents a client used to interact with the paypal api.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Client {
     /// Internal http client
     pub(crate) client: reqwest::Client,
     /// Whether you are or not in a sandbox enviroment.
-    pub sandbox: bool,
+    pub env: PaypalEnv,
     /// Api Auth information
     pub auth: Auth,
+}
+
+/// The paypal api environment.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum PaypalEnv {
+    /// The live environment.
+    Live,
+    /// The sandbox environment.
+    Sandbox,
+    /// For mocking.
+    Mock(String),
+}
+
+impl PaypalEnv {
+    /// Returns the endpoint of this environment.
+    pub fn endpoint(&self) -> &str {
+        match &self {
+            PaypalEnv::Live => LIVE_ENDPOINT,
+            PaypalEnv::Sandbox => SANDBOX_ENDPOINT,
+            PaypalEnv::Mock(endpoint) => endpoint.as_str(),
+        }
+    }
+
+    /// Constructs a url from the target.
+    pub fn make_url(&self, target: &str) -> String {
+        assert!(target.starts_with('/'), "target path must start with '/'");
+        format!("{}{}", self.endpoint(), target)
+    }
 }
 
 impl Client {
@@ -76,24 +104,16 @@ impl Client {
     ///     client.get_access_token().await.unwrap();
     /// }
     /// ```
-    pub fn new(client_id: String, secret: String, sandbox: bool) -> Client {
+    pub fn new(client_id: String, secret: String, env: PaypalEnv) -> Client {
         Client {
             client: reqwest::Client::new(),
-            sandbox,
+            env,
             auth: Auth {
                 client_id,
                 secret,
                 access_token: None,
                 expires: None,
             },
-        }
-    }
-
-    fn endpoint(&self) -> &str {
-        if self.sandbox {
-            SANDBOX_ENDPOINT
-        } else {
-            LIVE_ENDPOINT
         }
     }
 
@@ -158,7 +178,7 @@ impl Client {
         }
         let res = self
             .client
-            .post(format!("{}/v1/oauth2/token", self.endpoint()).as_str())
+            .post(self.env.make_url("/v1/oauth2/token"))
             .basic_auth(&self.auth.client_id, Some(&self.auth.secret))
             .header("Content-Type", "x-www-form-urlencoded")
             .header("Accept", "application/json")
@@ -193,7 +213,7 @@ impl Client {
     where
         E: Endpoint,
     {
-        let mut url = endpoint.full_path(self.sandbox);
+        let mut url = self.env.make_url(&endpoint.relative_path());
 
         if let Some(query) = endpoint.query() {
             let query_string = serde_qs::to_string(&query).expect("serialize the query correctly");

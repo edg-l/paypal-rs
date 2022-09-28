@@ -184,7 +184,7 @@ mod tests {
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
         let secret = env::var("PAYPAL_SECRET").unwrap();
 
-        Client::new(clientid, secret, true)
+        Client::new(clientid, secret, crate::PaypalEnv::Sandbox)
     }
 
     #[test]

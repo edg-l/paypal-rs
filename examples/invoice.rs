@@ -1,6 +1,6 @@
 use color_eyre::Result;
 use paypal_rs::data::invoice::*;
-use paypal_rs::{api::invoice::*, data::common::Money};
+use paypal_rs::{api::invoice::*, data::common::Money, PaypalEnv};
 use paypal_rs::{data::common::Currency, Client};
 
 #[tokio::main]
@@ -11,7 +11,7 @@ async fn main() -> Result<()> {
     let clientid = std::env::var("PAYPAL_CLIENTID")?;
     let secret = std::env::var("PAYPAL_SECRET")?;
 
-    let mut client = Client::new(clientid, secret, true);
+    let mut client = Client::new(clientid, secret, PaypalEnv::Sandbox);
     client.get_access_token().await?;
 
     let payload = InvoicePayloadBuilder::default()

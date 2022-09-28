@@ -1,6 +1,6 @@
 //! This module contains the endpoint trait used to implemented api endpoints.
 
-use crate::{LIVE_ENDPOINT, SANDBOX_ENDPOINT};
+use crate::{LIVE_ENDPOINT, SANDBOX_ENDPOINT, PaypalEnv};
 use serde::{de::DeserializeOwned, Serialize};
 use std::borrow::Cow;
 
@@ -27,20 +27,5 @@ pub trait Endpoint {
     /// The body to be used when calling this endpoint.
     fn body(&self) -> Option<Self::Body> {
         None
-    }
-
-    /// The full path of this endpoint.
-    ///
-    /// Automatically implemented.
-    fn full_path(&self, is_sandbox: bool) -> String {
-        let relative_path = self.relative_path();
-
-        assert!(relative_path.starts_with('/'), "relative path must start with '/'");
-
-        if is_sandbox {
-            format!("{}{}", SANDBOX_ENDPOINT, relative_path)
-        } else {
-            format!("{}{}", LIVE_ENDPOINT, relative_path)
-        }
     }
 }

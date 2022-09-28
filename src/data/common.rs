@@ -41,7 +41,8 @@ pub struct AddressDetails {
 
 /// The address of the payer.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct Address {
     /// The first line of the address. For example, number or street. For example, 173 Drury Lane.
     /// Required for data entry and compliance and risk checks. Must contain the full address.
@@ -63,6 +64,7 @@ pub struct Address {
 
 /// Represents money
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Money {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,

@@ -407,7 +407,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_invoice_create_cancel() -> anyhow::Result<()> {
+    async fn test_invoice_create_cancel() -> color_eyre::Result<()> {
         let client = create_client().await;
 
         let payload = InvoicePayloadBuilder::default()

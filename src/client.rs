@@ -171,7 +171,7 @@ impl Client {
         Ok(builder.headers(headers))
     }
 
-    /// Gets a access token used in all the api calls.
+    /// Gets a access token used in all the api calls and saves it.
     pub async fn get_access_token(&mut self) -> Result<(), ResponseError> {
         if !self.access_token_expired() {
             return Ok(());

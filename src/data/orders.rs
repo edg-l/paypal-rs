@@ -1,6 +1,6 @@
 //! Paypal object definitions used by the orders api.
 
-use super::common::*;
+use super::{common::*, invoice::BillingInfo};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -28,7 +28,7 @@ impl Default for Intent {
 /// Represents a payer name.
 ///
 /// <https://developer.paypal.com/docs/api/orders/v2/#definition-payer.name>
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Builder)]
 pub struct PayerName {
     /// When the party is a person, the party's given, or first, name.
     pub given_name: String,
@@ -38,7 +38,8 @@ pub struct PayerName {
 }
 
 /// The phone number, in its canonical international E.164 numbering plan format.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct PhoneNumber {
     /// The national number, in its canonical international E.164 numbering plan format.
     /// The combined length of the country calling code (CC) and the national number must not be greater than 15 digits.
@@ -49,7 +50,8 @@ pub struct PhoneNumber {
 /// The phone number of the customer. Available only when you enable the
 /// Contact Telephone Number option in the Profile & Settings for the merchant's PayPal account.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct Phone {
     /// The phone type.
     pub phone_type: Option<PhoneType>,
@@ -69,7 +71,8 @@ pub enum TaxIdType {
 }
 
 /// The tax information of the payer.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct TaxInfo {
     /// The customer's tax ID. Supported for the PayPal payment method only.
     /// Typically, the tax ID is 11 characters long for individuals and 14 characters long for businesses.
@@ -83,6 +86,7 @@ pub struct TaxInfo {
 /// <https://developer.paypal.com/docs/api/orders/v2/#definition-payer>
 #[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct Payer {
     /// The name of the payer.
     pub name: Option<PayerName>,
@@ -103,7 +107,8 @@ pub struct Payer {
 
 /// Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Breakdown {
     /// The subtotal for all items. Required if the request includes purchase_units[].items[].unit_amount.
     /// Must equal the sum of (items[].unit_amount * items[].quantity) for all items.
@@ -124,7 +129,8 @@ pub struct Breakdown {
 
 /// Represents an amount of money.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct Amount {
     /// The [three-character ISO-4217 currency code](https://developer.paypal.com/docs/integration/direct/rest/currency-codes/) that identifies the currency.
     pub currency_code: Currency,
@@ -147,11 +153,30 @@ impl Amount {
             breakdown: None,
         }
     }
+
+    /// Creates a new amount with the EUR currency.
+    pub fn eur(value: &str) -> Self {
+        Amount {
+            currency_code: Currency::EUR,
+            value: value.to_owned(),
+            breakdown: None,
+        }
+    }
+
+    /// Creates a new amount with the USD currency.
+    pub fn usd(value: &str) -> Self {
+        Amount {
+            currency_code: Currency::USD,
+            value: value.to_owned(),
+            breakdown: None,
+        }
+    }
 }
 
 /// The merchant who receives payment for this transaction.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Payee {
     /// The email address of merchant.
     pub email_address: Option<String>,
@@ -161,7 +186,8 @@ pub struct Payee {
 
 /// Fees, commissions, tips, or donations
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct PlatformFee {
     /// The fee for this transaction.
     pub amount: Money,
@@ -189,7 +215,8 @@ impl Default for DisbursementMode {
 
 /// Any additional payment instructions for PayPal Commerce Platform customers.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct PaymentInstruction {
     /// An array of various fees, commissions, tips, or donations.
     pub platform_fees: Option<Vec<PlatformFee>>,
@@ -225,7 +252,8 @@ pub struct ShippingDetailName {
 
 /// The name and address of the person to whom to ship the items.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct ShippingDetail {
     /// The name of the person to whom to ship the items. Supports only the full_name property.
     pub name: Option<ShippingDetailName>,
@@ -235,7 +263,8 @@ pub struct ShippingDetail {
 
 /// Represents an item.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into))]
 pub struct Item {
     /// The item name or title.
     pub name: String,
@@ -342,7 +371,8 @@ pub struct CaptureStatusDetails {
 
 /// A captured payment.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Copy, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct Capture {
     /// The status of the captured payment.
     pub status: CaptureStatus,
@@ -378,7 +408,7 @@ pub struct RefundStatusDetails {
 }
 
 /// Exchange rate.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
 pub struct ExchangeRate {
     /// The source currency from which to convert an amount.
     pub source_currency: Currency,
@@ -389,7 +419,7 @@ pub struct ExchangeRate {
 }
 
 /// The net breakdown of the refund.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
 pub struct NetAmountBreakdown {
     /// The converted payable amount.
     pub converted_amount: Money,
@@ -400,7 +430,8 @@ pub struct NetAmountBreakdown {
 }
 
 /// The breakdown of the refund.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct SellerPayableBreakdown {
     /// The amount that the payee refunded to the payer.
     pub gross_amount: Money,
@@ -421,7 +452,8 @@ pub struct SellerPayableBreakdown {
 }
 
 /// A refund
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct Refund {
     /// The status of the refund.
     pub status: RefundStatus,
@@ -442,7 +474,8 @@ pub struct Refund {
 }
 
 /// The comprehensive history of payments for the purchase unit.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct PaymentCollection {
     /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
     #[serde(default)]
@@ -457,7 +490,8 @@ pub struct PaymentCollection {
 
 /// Represents either a full or partial order that the payer intends to purchase from the payee.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct PurchaseUnit {
     /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must update the order through PATCH.
     /// If you omit this value and the order contains only one purchase unit, PayPal sets this value to default.
@@ -600,7 +634,8 @@ pub struct PaymentMethod {
 
 /// Customize the payer experience during the approval process for the payment with PayPal.
 #[skip_serializing_none]
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option, into), default)]
 pub struct ApplicationContext {
     /// The label that overrides the business name in the PayPal account on the PayPal site.
     pub brand_name: Option<String>,
@@ -622,31 +657,81 @@ pub struct ApplicationContext {
     pub cancel_url: Option<String>,
 }
 
-/// A order payload to be used when creating an order.
+/// A card used in payment sources.
 #[skip_serializing_none]
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
-#[builder(setter(strip_option), default)]
+#[builder(setter(into))]
+pub struct PaymentCard {
+    /// The card number.
+    pub number: String,
+    /// The expiry date.
+    pub expiry: String,
+    /// The card owner name.
+    pub name: String,
+    /// The billing address.
+    pub billing_address: Address
+}
+
+/// A transaction reference.
+#[skip_serializing_none]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(into))]
+pub struct TransactionReference {
+    /// The transaction id.
+    pub id: String,
+    /// The transaction network, e.g "VISA"
+    pub network: String,
+}
+
+/// A stored credential.
+#[skip_serializing_none]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(into))]
+pub struct StoredCredential {
+    /// The payment initiator, e.g "MERCHANT"
+    pub payment_initiator: String,
+    /// The payment type, e.g "RECURRING"
+    pub payment_type: String,
+    /// The stored credential usage, e.g: SUBSEQUENT
+    pub usage: String,
+    /// The billing address.
+    pub previous_network_transaction_reference: TransactionReference
+}
+
+/// A order payload to be used when creating an order.
+// TODO: this only appears in the example body, not documented.
+// https://developer.paypal.com/docs/api/orders/v2/#orders_create
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
+pub struct OrderPaymentSource {
+    /// The card used in the payment.
+    pub card: PaymentCard,
+    /// A stored credential.
+    // TODO: figure out what is this.
+    #[builder(default)]
+    pub stored_credential: Option<StoredCredential>,
+}
+
+/// A order payload to be used when creating an order.
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct OrderPayload {
     /// The intent to either capture payment immediately or authorize a payment for an order after order creation.
     pub intent: Intent,
-    /// The customer who approves and pays for the order. The customer is also known as the payer.
+    /// DEPRECATED. The customer who approves and pays for the order. The customer is also known as the payer.
+    #[builder(default)]
     pub payer: Option<Payer>,
     /// An array of purchase units. Each purchase unit establishes a contract between a payer and the payee.
     /// Each purchase unit represents either a full or partial order that the payer intends to purchase from the payee.
     pub purchase_units: Vec<PurchaseUnit>,
     /// Customize the payer experience during the approval process for the payment with PayPal.
+    #[builder(default)]
     pub application_context: Option<ApplicationContext>,
-}
-
-impl OrderPayload {
-    /// Creates a new order payload with the required properties.
-    pub fn new<S: Into<Vec<PurchaseUnit>>>(intent: Intent, purchase_units: S) -> Self {
-        Self {
-            intent,
-            purchase_units: purchase_units.into(),
-            ..Default::default()
-        }
-    }
+    /// The payment source.
+    #[builder(default)]
+    pub payment_source: Option<OrderPaymentSource>,
 }
 
 /// The card brand or network.
@@ -717,7 +802,7 @@ pub struct WalletResponse {
 }
 
 /// The paypal account used to fund the transaction.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
 pub struct PaypalPaymentSourceResponse {
     /// The name of the payer.
     pub name: PayerName,
@@ -728,7 +813,8 @@ pub struct PaypalPaymentSourceResponse {
 }
 
 /// The payment source used to fund the payment.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Builder, Default, Clone)]
+#[builder(setter(strip_option), default)]
 pub struct PaymentSourceResponse {
     /// The payment card to use to fund a payment. Card can be a credit or debit card
     pub card: Option<CardResponse>,
@@ -740,7 +826,7 @@ pub struct PaymentSourceResponse {
 }
 
 /// The status of an order.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderStatus {
     /// The order was created with the specified context.
@@ -758,7 +844,8 @@ pub enum OrderStatus {
 
 /// An order represents a payment between two or more parties.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Builder)]
+#[builder(setter(strip_option))]
 pub struct Order {
     /// The date and time when the transaction occurred.
     pub create_time: Option<chrono::DateTime<chrono::Utc>>,

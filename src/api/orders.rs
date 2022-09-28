@@ -193,7 +193,7 @@ mod tests {
     use crate::{api::orders::*, data::orders::*, tests::create_client};
 
     #[tokio::test]
-    async fn test_order() -> anyhow::Result<()> {
+    async fn test_order() -> color_eyre::Result<()> {
         let mut client = create_client().await;
         client.get_access_token().await.expect("get access token error");
 

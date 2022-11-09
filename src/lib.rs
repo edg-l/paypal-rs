@@ -14,12 +14,13 @@
 
 //! ## Example
 //!
-//! ```rust
+//! ```no_run
 //! use paypal_rs::{
 //!     Client,
 //!     api::orders::*,
 //!     data::orders::*,
 //!     data::common::Currency,
+//!     PaypalEnv,
 //! };
 //!
 //! #[tokio::main]
@@ -28,7 +29,7 @@
 //!     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
 //!     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 //!
-//!     let mut client = Client::new(clientid, secret, true);
+//!     let mut client = Client::new(clientid, secret, PaypalEnv::Sandbox);
 //!
 //!     client.get_access_token().await.unwrap();
 //!
@@ -175,10 +176,11 @@ struct AuthAssertionClaims {
 mod tests {
     use crate::countries::Country;
     use crate::data::common::Currency;
-    use crate::Client;
-    use std::env;
+    //use crate::Client;
+    //use std::env;
     use std::str::FromStr;
 
+    /*
     pub async fn create_client() -> Client {
         dotenvy::dotenv().ok();
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
@@ -186,6 +188,7 @@ mod tests {
 
         Client::new(clientid, secret, crate::PaypalEnv::Sandbox)
     }
+    */
 
     #[test]
     fn test_currency() {

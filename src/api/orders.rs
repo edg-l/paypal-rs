@@ -185,7 +185,7 @@ impl Endpoint for AuthorizeOrder {
         Some(self.body.clone())
     }
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use crate::data::common::Currency;
@@ -257,3 +257,4 @@ mod tests {
         Ok(())
     }
 }
+*/

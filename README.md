@@ -21,6 +21,7 @@ use paypal_rs::{
     api::orders::*,
     data::orders::*,
     data::common::Currency,
+    PaypalEnv,
 };
 
 #[tokio::main]
@@ -29,7 +30,7 @@ async fn main() {
     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 
-    let mut client = Client::new(clientid, secret, true);
+    let mut client = Client::new(clientid, secret, PaypalEnv::Sandbox);
 
     client.get_access_token().await.unwrap();
 

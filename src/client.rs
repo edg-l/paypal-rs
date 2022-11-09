@@ -87,8 +87,8 @@ impl Client {
     ///
     /// # Examples
     ///
-    /// ```
-    /// use paypal_rs::Client;
+    /// ```no_run
+    /// use paypal_rs::{Client, PaypalEnv};
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -99,7 +99,7 @@ impl Client {
     ///     let mut client = Client::new(
     ///         clientid,
     ///         secret,
-    ///         true,
+    ///         PaypalEnv::Sandbox,
     ///     );
     ///     client.get_access_token().await.unwrap();
     /// }

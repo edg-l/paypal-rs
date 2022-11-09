@@ -1,6 +1,6 @@
 //! Paypal object definitions used by the orders api.
 
-use super::{common::*, invoice::BillingInfo};
+use super::common::*;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -669,7 +669,7 @@ pub struct PaymentCard {
     /// The card owner name.
     pub name: String,
     /// The billing address.
-    pub billing_address: Address
+    pub billing_address: Address,
 }
 
 /// A transaction reference.
@@ -695,7 +695,7 @@ pub struct StoredCredential {
     /// The stored credential usage, e.g: SUBSEQUENT
     pub usage: String,
     /// The billing address.
-    pub previous_network_transaction_reference: TransactionReference
+    pub previous_network_transaction_reference: TransactionReference,
 }
 
 /// A order payload to be used when creating an order.

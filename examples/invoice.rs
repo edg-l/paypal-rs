@@ -6,7 +6,7 @@ use paypal_rs::{data::common::Currency, Client};
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let clientid = std::env::var("PAYPAL_CLIENTID")?;
     let secret = std::env::var("PAYPAL_SECRET")?;

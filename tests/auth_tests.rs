@@ -8,13 +8,17 @@ use wiremock::{
 };
 
 fn create_client(url: &str) -> Client {
-    Client::new("clientid".to_string(), "secret".to_string(), PaypalEnv::Mock(url.to_string()))
+    Client::new(
+        "clientid".to_string(),
+        "secret".to_string(),
+        PaypalEnv::Mock(url.to_string()),
+    )
 }
 
 #[tokio::test]
 async fn test_auth() -> color_eyre::Result<()> {
     color_eyre::install()?;
-    
+
     let mock_server = MockServer::start().await;
 
     let access_token: serde_json::Value = serde_json::from_str(include_str!("resources/oauth_token.json")).unwrap();

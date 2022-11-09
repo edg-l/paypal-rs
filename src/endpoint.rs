@@ -1,6 +1,5 @@
 //! This module contains the endpoint trait used to implemented api endpoints.
 
-use crate::{LIVE_ENDPOINT, SANDBOX_ENDPOINT, PaypalEnv};
 use serde::{de::DeserializeOwned, Serialize};
 use std::borrow::Cow;
 

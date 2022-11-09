@@ -25,7 +25,7 @@ use paypal_rs::{
 
 #[tokio::main]
 async fn main() {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 

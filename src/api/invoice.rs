@@ -397,7 +397,7 @@ mod tests {
     use crate::Client;
 
     async fn create_client() -> Client {
-        dotenv::dotenv().ok();
+        dotenvy::dotenv().ok();
         let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
         let secret = std::env::var("PAYPAL_SECRET").unwrap();
 

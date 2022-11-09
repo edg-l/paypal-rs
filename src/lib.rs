@@ -24,7 +24,7 @@
 //!
 //! #[tokio::main]
 //! async fn main() {
-//!     dotenv::dotenv().ok();
+//!     dotenvy::dotenv().ok();
 //!     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
 //!     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 //!
@@ -180,7 +180,7 @@ mod tests {
     use std::str::FromStr;
 
     pub async fn create_client() -> Client {
-        dotenv::dotenv().ok();
+        dotenvy::dotenv().ok();
         let clientid = env::var("PAYPAL_CLIENTID").unwrap();
         let secret = env::var("PAYPAL_SECRET").unwrap();
 

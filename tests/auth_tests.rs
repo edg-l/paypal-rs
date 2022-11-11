@@ -1,11 +1,6 @@
-use paypal_rs::{api::orders::*, data::orders::*};
-use paypal_rs::{data::common::Currency, Client, PaypalEnv};
-use paypal_rs::{AccessToken, HeaderParams};
-use wiremock::matchers::{basic_auth, body_string, header, method, path, BodyExactMatcher, HeaderExactMatcher};
-use wiremock::{
-    matchers::{BasicAuthMatcher, BearerTokenMatcher},
-    Mock, MockServer, ResponseTemplate,
-};
+use paypal_rs::{Client, PaypalEnv};
+use wiremock::matchers::{basic_auth, body_string, header, method, path};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 fn create_client(url: &str) -> Client {
     Client::new(

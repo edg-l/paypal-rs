@@ -88,7 +88,7 @@ async fn test_create_order() -> color_eyre::Result<()> {
         )
         .build()?;
 
-    let create_order = CreateOrder::new(order);
+    let _create_order = CreateOrder::new(order);
 
     Ok(())
 }

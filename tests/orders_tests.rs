@@ -42,7 +42,7 @@ async fn test_create_order() -> color_eyre::Result<()> {
         .mount(&mock_server)
         .await;
 
-    let mut client = create_client(&mock_server.uri());
+    let client = create_client(&mock_server.uri());
 
     client.get_access_token().await?;
 

@@ -11,7 +11,7 @@ async fn main() -> Result<()> {
     let clientid = std::env::var("PAYPAL_CLIENTID")?;
     let secret = std::env::var("PAYPAL_SECRET")?;
 
-    let mut client = Client::new(clientid, secret, PaypalEnv::Sandbox);
+    let client = Client::new(clientid, secret, PaypalEnv::Sandbox);
     client.get_access_token().await?;
 
     let payload = InvoicePayloadBuilder::default()

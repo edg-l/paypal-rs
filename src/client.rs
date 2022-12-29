@@ -2,6 +2,7 @@
 
 use reqwest::header::{self, HeaderMap};
 use serde::Deserialize;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use std::time::Instant;
 
@@ -31,16 +32,16 @@ pub struct AccessToken {
 }
 
 /// Stores OAuth2 information.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone)]
 pub struct Auth {
     /// Your client id.
     pub client_id: String,
     /// The secret.
     pub secret: String,
     /// The access token returned by oauth2 authentication.
-    pub access_token: Option<AccessToken>,
+    pub access_token: Arc<RwLock<Option<AccessToken>>>,
     /// Used to check when the token expires.
-    pub expires: Option<(Instant, Duration)>,
+    pub expires: Arc<RwLock<Option<(Instant, Duration)>>>,
 }
 
 /// Represents a client used to interact with the paypal api.
@@ -96,7 +97,7 @@ impl Client {
     ///     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
     ///     let secret = std::env::var("PAYPAL_SECRET").unwrap();
     ///
-    ///     let mut client = Client::new(
+    ///     let client = Client::new(
     ///         clientid,
     ///         secret,
     ///         PaypalEnv::Sandbox,
@@ -111,8 +112,8 @@ impl Client {
             auth: Auth {
                 client_id,
                 secret,
-                access_token: None,
-                expires: None,
+                access_token: Default::default(),
+                expires: Default::default(),
             },
         }
     }
@@ -127,7 +128,7 @@ impl Client {
 
         headers.append(header::ACCEPT, "application/json".parse().unwrap());
 
-        if let Some(token) = &self.auth.access_token {
+        if let Some(token) = &*self.auth.access_token.read().unwrap() {
             headers.append(
                 header::AUTHORIZATION,
                 format!("Bearer {}", token.access_token).parse().unwrap(),
@@ -172,7 +173,7 @@ impl Client {
     }
 
     /// Gets a access token used in all the api calls and saves it.
-    pub async fn get_access_token(&mut self) -> Result<(), ResponseError> {
+    pub async fn get_access_token(&self) -> Result<(), ResponseError> {
         if !self.access_token_expired() {
             return Ok(());
         }
@@ -189,8 +190,8 @@ impl Client {
 
         if res.status().is_success() {
             let token = res.json::<AccessToken>().await.map_err(ResponseError::HttpError)?;
-            self.auth.expires = Some((Instant::now(), Duration::new(token.expires_in, 0)));
-            self.auth.access_token = Some(token);
+            *self.auth.expires.write().unwrap() = Some((Instant::now(), Duration::new(token.expires_in, 0)));
+            *self.auth.access_token.write().unwrap() = Some(token);
             Ok(())
         } else {
             Err(ResponseError::ApiError(
@@ -201,7 +202,7 @@ impl Client {
 
     /// Checks if the access token expired.
     pub fn access_token_expired(&self) -> bool {
-        if let Some(expires) = self.auth.expires {
+        if let Some(expires) = *self.auth.expires.read().unwrap() {
             expires.0.elapsed() >= expires.1
         } else {
             true

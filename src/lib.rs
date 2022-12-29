@@ -29,7 +29,7 @@
 //!     let clientid = std::env::var("PAYPAL_CLIENTID").unwrap();
 //!     let secret = std::env::var("PAYPAL_SECRET").unwrap();
 //!
-//!     let mut client = Client::new(clientid, secret, PaypalEnv::Sandbox);
+//!     let client = Client::new(clientid, secret, PaypalEnv::Sandbox);
 //!
 //!     client.get_access_token().await.unwrap();
 //!

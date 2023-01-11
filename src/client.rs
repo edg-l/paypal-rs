@@ -1,5 +1,6 @@
 //! The paypal api wrapper client, which holds the http request client.
 
+use base64::Engine;
 use reqwest::header::{self, HeaderMap};
 use serde::Deserialize;
 use std::time::Duration;
@@ -146,7 +147,7 @@ impl Client {
                 &jsonwebtoken::EncodingKey::from_secret(self.auth.secret.as_ref()),
             )
             .unwrap();
-            let encoded_token = base64::encode(token);
+            let encoded_token = base64::engine::general_purpose::STANDARD_NO_PAD.encode(token);
             headers.append("PayPal-Auth-Assertion", encoded_token.parse().unwrap());
         }
 

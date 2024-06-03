@@ -234,6 +234,9 @@ pub enum ItemCategoryType {
     DigitalGoods,
     /// A tangible item that can be shipped with proof of delivery.
     PhysicalGoods,
+
+    /// A contribution or gift for which no good or service is exchanged, usually to a not for profit organization.
+    Donation,
 }
 
 impl Default for ItemCategoryType {

@@ -1,6 +1,6 @@
 [package]
 name = "paypal-rs"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["Edgar <git@edgarluque.com>"]
 description = "A library that wraps the paypal api asynchronously."
 repository = "https://github.com/edg-l/paypal-rs/"
@@ -13,23 +13,23 @@ edition = "2021"
 
 
 [dependencies]
-reqwest = { version = "0.11.15", default-features = false, features = ["json"] }
-serde = { version = "1.0.158", features = ["derive"] }
-serde_json = "1.0.94"
-serde_with = "2.3.1"
+reqwest = { version = "0.12.4", default-features = false, features = ["json"] }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+serde_with = "3.8.1"
 chrono = { version = "0.4.24", features = ["serde"] }
-jsonwebtoken = "8.3.0"
-base64 = "0.21.0"
-log = "0.4.17"
-bytes = "1.4.0"
-derive_builder = "0.12.0"
-serde_qs = "0.12.0"
+jsonwebtoken = "9.3.0"
+base64 = "0.22.1"
+log = "0.4.21"
+bytes = "1.6.0"
+derive_builder = "0.20.0"
+serde_qs = "0.13.0"
 
 [dev-dependencies]
-tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 dotenvy = "0.15.7"
-color-eyre = "0.6.2"
-wiremock = "0.5.17"
+color-eyre = "0.6.3"
+wiremock = "0.6.0"
 
 [features]
 default = ["reqwest/native-tls"]
